@@ -17,7 +17,7 @@ class agent_rx extends uvm_agent;
         super.build_phase(phase);
 
         //ahora se construyen los componentes del agente, como monitor, driver y sequencer
-        m_monitor_rx = m_monitor_rx::type_id::create("m_monitor_rx", this);
+        m_monitor_rx = monitor_rx::type_id::create("m_monitor_rx", this);
 
         //se crea el sequencer y driver, este tiene que ser activo porque maneja el flujo  de transacciones
         if(get_is_active() == 1) begin
