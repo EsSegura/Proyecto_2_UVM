@@ -25,7 +25,7 @@ class agent_tx extends uvm_agent;
         //se crea el sequencer y driver, este tiene que ser activo porque maneja el flujo  de transacciones
         if(get_is_active() == UVM_ACTIVE) begin
             m_sequencer_tx = uvm_sequencer #(m_seq_item)::type_id::create("m_sequencer_tx", this);
-            m_driver_tx = driver_rx::type_id::create("m_driver_t", this);
+            m_driver_tx = driver_rx::type_id::create("m_driver_tx", this);
         end
     endfunction
 
