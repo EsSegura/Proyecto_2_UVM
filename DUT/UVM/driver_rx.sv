@@ -21,8 +21,7 @@ class driver_rx extends uvm_driver #(m_seq_item);
 
 
     virtual task run_phase(uvm_phase phase);
-        m_seq_item request_item;
-        //estado idle, valid en 0
+        // Arrancamos en reposo para no manejar el bus antes del reset.
         drive_idle();
         @(posedge vif.clk);
         wait (vif.reset_n === 1'b1);
@@ -56,7 +55,7 @@ class driver_rx extends uvm_driver #(m_seq_item);
         //esperar hasta a que haya un handshake, un ready en 1
         //el DUT puede deassertar el ready si el fifo rx esta full, generando backpressure
         @(posedge vif.clk);
-        while (vif.md_rd_ready !== 1'b1) begin
+        while (vif.md_rx_ready !== 1'b1) begin
             @(posedge vif.clk);
         end
 
@@ -71,3 +70,4 @@ class driver_rx extends uvm_driver #(m_seq_item);
     endtask
 
 endclass
+

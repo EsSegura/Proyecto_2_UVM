@@ -40,13 +40,13 @@ class monitor_rx extends uvm_monitor;
     task collect_transfer();
         m_seq_item item;
  
-        //aca se espera a un flanco de reloj donde valid y read esten en 1, indicando que hay una transaccion valida 
+        // Esperamos el handshake de entrada para capturar una transacción completa.
         @(posedge vif.clk);
         while (!(vif.md_rx_valid === 1'b1 && vif.md_rx_ready === 1'b1)) begin
             @(posedge vif.clk);
         end
 
-        //se crea un item de la transaccion y se llenan los campos con los datos de la interfaz
+        // Empaquetamos la transacción de entrada para enviarla al scoreboard.
         item = m_seq_item::type_id::create("item");
         item.data = vif.md_rx_data;
         item.offset = vif.md_rx_offset;

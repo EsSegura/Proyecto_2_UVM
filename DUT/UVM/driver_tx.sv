@@ -14,15 +14,14 @@ class driver_tx extends uvm_driver #(m_seq_item);
     virtual function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        if (!uvm_config_db #(virtual md_rx_if)::get (this, "", "vif", vif)) begin      
+        if (!uvm_config_db #(virtual md_tx_if)::get(this, "", "vif", vif)) begin      
             `uvm_fatal (get_type_name (), "No se encontró la interfaz md_tx_if")    
         end 
     endfunction
 
 
     virtual task run_phase(uvm_phase phase);
-        m_seq_item request_item;
-        //estado idle, valid en 0
+        // Arrancamos en reposo para no manejar el bus antes del reset.
         drive_not_ready();
         @(posedge vif.clk);
         wait (vif.reset_n === 1'b1);
@@ -38,13 +37,13 @@ class driver_tx extends uvm_driver #(m_seq_item);
     endtask
 
     task drive_not_ready();
-        vif.md_rx_ready <= '0;
-        vif.md_rx_err   <= '0;
+        vif.md_tx_ready <= 1'b0;
+        vif.md_tx_err   <= 1'b0;
     endtask
 
-    task respond_to_transfer(m_seq_item);
+    task respond_to_transfer(m_seq_item item);
         @(posedge vif.clk);
-        while(vif.md_tx_valid !== 1'b1) begin
+        while (vif.md_tx_valid !== 1'b1) begin
             @(posedge vif.clk);
         end
 

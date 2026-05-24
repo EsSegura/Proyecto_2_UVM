@@ -19,11 +19,11 @@ class agent_rx extends uvm_agent;
         super.build_phase(phase);
         analysis_port = new("analysis_port", this);
 
-        //ahora se construyen los componentes del agente, como monitor, driver y sequencer
+        // Este agente solo cubre la entrada MD del DUT.
         m_monitor_rx = monitor_rx::type_id::create("m_monitor_rx", this);
 
-        //se crea el sequencer y driver, este tiene que ser activo porque maneja el flujo  de transacciones
-        if(get_is_active() == UVM_ACTIVE) begin
+        // El driver se activa para generar el flujo de entrada cuando el test lo pida.
+        if (get_is_active() == UVM_ACTIVE) begin
             m_sequencer_rx = uvm_sequencer #(m_seq_item)::type_id::create("m_sequencer_rx", this);
             m_driver_rx = driver_rx::type_id::create("m_driver_rx", this);
         end
@@ -31,8 +31,9 @@ class agent_rx extends uvm_agent;
     endfunction
 
     virtual function void connect_phase(uvm_phase phase);
-        m_monitor_tx.analysis_port.connect(analysis_port);
-        if(get_is_active() == UVM_ACTIVE) begin
+        m_monitor_rx.monitor_analysis_port.connect(analysis_port);
+
+        if (get_is_active() == UVM_ACTIVE) begin
             m_driver_rx.seq_item_port.connect(m_sequencer_rx.seq_item_export);
         end
 
