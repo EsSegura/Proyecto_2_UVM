@@ -5,8 +5,8 @@ class agent_tx extends uvm_agent;
 
     `uvm_component_utils(agent_tx)
 
-    driver_rx m_driver_tx;
-    monitor_rx m_monitor_tx;
+    driver_tx m_driver_tx;
+    monitor_tx m_monitor_tx;
     uvm_sequencer #(m_seq_item) m_sequencer_tx;
 
     uvm_analysis_port #(m_seq_item) analysis_port;
@@ -19,19 +19,20 @@ class agent_tx extends uvm_agent;
         super.build_phase(phase);
         analysis_port = new("analysis_port", this);
 
-        //ahora se construyen los componentes del agente, como monitor, driver y sequencer
-        m_monitor_rx = monitor_rx::type_id::create("m_monitor_tx", this);
+        // Este agente observa y responde la salida MD del DUT.
+        m_monitor_tx = monitor_tx::type_id::create("m_monitor_tx", this);
 
-        //se crea el sequencer y driver, este tiene que ser activo porque maneja el flujo  de transacciones
-        if(get_is_active() == UVM_ACTIVE) begin
+        // El driver se deja activo para modelar la respuesta del lado TX.
+        if (get_is_active() == UVM_ACTIVE) begin
             m_sequencer_tx = uvm_sequencer #(m_seq_item)::type_id::create("m_sequencer_tx", this);
-            m_driver_tx = driver_rx::type_id::create("m_driver_t", this);
+            m_driver_tx = driver_tx::type_id::create("m_driver_tx", this);
         end
     endfunction
 
     virtual function void connect_phase(uvm_phase phase);
-        m_monitor_tx.analysis_port.connect(analysis_port);
-        if(get_is_active() == UVM_ACTIVE) begin
+        m_monitor_tx.monitor_analysis_port.connect(analysis_port);
+
+        if (get_is_active() == UVM_ACTIVE) begin
             m_driver_tx.seq_item_port.connect(m_sequencer_tx.seq_item_export);
         end
 
