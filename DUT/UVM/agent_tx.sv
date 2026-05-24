@@ -25,7 +25,11 @@ class agent_tx extends uvm_agent;
         // El driver se deja activo para modelar la respuesta del lado TX.
         if (get_is_active() == UVM_ACTIVE) begin
             m_sequencer_tx = uvm_sequencer #(m_seq_item)::type_id::create("m_sequencer_tx", this);
+<<<<<<< HEAD
             m_driver_tx = driver_tx::type_id::create("m_driver_tx", this);
+=======
+            m_driver_tx = driver_rx::type_id::create("m_driver_tx", this);
+>>>>>>> 70a6dca254d6148d3515e799f2e77312f008ec80
         end
     endfunction
 
