@@ -1,0 +1,126 @@
+`timescale 1ns/1ps
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+import aligner_apb_registerfile_model::*;
+
+//Interfaces
+`include "apb_if.sv"
+`include "md_if.sv"
+
+//Seq Items
+`include "seq_item_apb.sv"
+`include "md_seq_item.sv"
+
+//APB
+`include "apb_monitor.sv"
+`include "apb_driver.sv"
+`include "adapter.sv"
+`include "apb_agent.sv"
+`include "apb_sequence.sv"
+
+//MD
+`include "md_rx_driver.sv"
+`include "md_tx_driver.sv"
+`include "md_monitor.sv"
+`include "md_agent.sv"
+`include "md_rx_sequences.sv"
+
+//Scoreboard, env, test
+`include "aligner_scoreboard.sv"
+`include "aligner_env.sv"
+`include "aligner_test.sv"
+
+//DUT
+`include "design.sv"
+
+module aligner_tb_top;
+
+    localparam int ALGN_DATA_WIDTH = 32;
+    localparam int FIFO_DEPTH      = 8;
+
+    logic clk;
+    logic reset_n;
+
+    // generar clok
+    initial clk = 1'b0;
+    always #5 clk = ~clk;
+
+    // reset bajo
+    initial begin
+        reset_n = 1'b0;
+        repeat (5) @(posedge clk);
+        @(negedge clk);
+        reset_n = 1'b1;
+        `uvm_info("TB_TOP", "Reset liberado", UVM_NONE)
+    end
+
+
+    apb_if #(
+        .ADDR_WIDTH(16),
+        .DATA_WIDTH(32)
+    ) apb_bus (
+        .PCLK   (clk),
+        .PRESETn(reset_n)
+    );
+
+    md_if #(
+        .DATA_WIDTH(ALGN_DATA_WIDTH)
+    ) md_bus (
+        .clk    (clk),
+        .reset_n(reset_n)
+    );
+
+    //dut
+    cfs_aligner #(
+        .ALGN_DATA_WIDTH(ALGN_DATA_WIDTH),
+        .FIFO_DEPTH     (FIFO_DEPTH)
+    ) dut (
+        .clk        (clk),
+        .reset_n    (reset_n),
+
+        // APB
+        .paddr      (apb_bus.PADDR),
+        .pwrite     (apb_bus.PWRITE),
+        .psel       (apb_bus.PSEL),
+        .penable    (apb_bus.PENABLE),
+        .pwdata     (apb_bus.PWDATA),
+        .pready     (apb_bus.PREADY),
+        .prdata     (apb_bus.PRDATA),
+        .pslverr    (apb_bus.PSLVERR),
+
+        // MD RX
+        .md_rx_valid (md_bus.md_rx_valid),
+        .md_rx_data  (md_bus.md_rx_data),
+        .md_rx_offset(md_bus.md_rx_offset),
+        .md_rx_size  (md_bus.md_rx_size),
+        .md_rx_ready (md_bus.md_rx_ready),
+        .md_rx_err   (md_bus.md_rx_err),
+
+        // MD TX
+        .md_tx_valid (md_bus.md_tx_valid),
+        .md_tx_data  (md_bus.md_tx_data),
+        .md_tx_offset(md_bus.md_tx_offset),
+        .md_tx_size  (md_bus.md_tx_size),
+        .md_tx_ready (md_bus.md_tx_ready),
+        .md_tx_err   (md_bus.md_tx_err),
+
+        // IRQ
+        .irq        ()
+    );
+
+
+    initial begin
+        // APB
+        uvm_config_db #(virtual apb_if)::set(null, "uvm_test_top.*", "vif", apb_bus);
+        // MD 
+        uvm_config_db #(virtual md_if)::set(null, "uvm_test_top.*", "md_vif", md_bus);
+        // Arrancar el test
+        run_test("aligner_test");
+    end
+
+    initial begin
+        #1_000_000;
+        `uvm_fatal("TB_TOP", "Timeout de simulación alcanzado")
+    end
+
+endmodule 
