@@ -52,6 +52,10 @@ class monitor_tx extends uvm_monitor;
                     item.data, item.offset, item.size, item.err), UVM_HIGH)
 
         monitor_analysis_port.write(item);
+
+        while (vif.md_tx_valid === 1'b1 && vif.md_tx_ready === 1'b1) begin
+            @(posedge vif.clk);
+        end
     endtask
 
 

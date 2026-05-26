@@ -7,7 +7,7 @@ class driver_rx extends uvm_driver #(m_seq_item);
 
     virtual md_rx_if vif;
 
-    function new(string name = "driver_rx", uvm_component parent = null)
+    function new(string name = "driver_rx", uvm_component parent = null);
         super.new(name, parent);
     endfunction
 
@@ -21,7 +21,7 @@ class driver_rx extends uvm_driver #(m_seq_item);
 
 
     virtual task run_phase(uvm_phase phase);
-        // Arrancamos en reposo para no manejar el bus antes del reset.
+        // arranca en reposo para no manejar el bus antes del reset
         drive_idle();
         @(posedge vif.clk);
         wait (vif.reset_n === 1'b1);

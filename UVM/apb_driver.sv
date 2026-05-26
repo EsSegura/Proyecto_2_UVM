@@ -26,17 +26,20 @@ endfunction
 
         task drive_transfer(apb_seq_item req);
             // fase de setup: se asignan las señales de dirección, control y datos para iniciar la transacción
-            vif.master_cb.PADDR <= req.addr; //asigna la dirección de la transacción al bus de direcciones
+            // truncate address/data to interface widths (APB_ADDR_WIDTH=16, APB_DATA_WIDTH=32)
+            vif.master_cb.PADDR <= req.addr[15:0]; //asigna la dirección de la transacción al bus de direcciones (16 bits)
             vif.master_cb.PWRITE <= req.write; //asigna el  tipo de operación (lectura o escritura) al bus de control
-            vif.master_cb.PWDATA <= req.data; //asigna los datos de la transacción al bus de datos              
+            vif.master_cb.PWDATA <= req.data[31:0]; //asigna los datos de la transacción al bus de datos (32 bits)
             vif.master_cb.PSEL <= 1; //activa la señal de selección para iniciar la transacción
             vif.master_cb.PENABLE <= 0; //asegura que la señal de enable esté desactivada durante la fase de setup
             @(vif.master_cb); //espera un ciclo de reloj para iniciar la fase access
             // fase de access 
             vif.master_cb.PENABLE <= 1; //activa la señal de enable para que la transacción se ejecute
-            do @(vif.master_cb); while(!vif.master_cb.PREADY); //espera a que la señal de ready se active, para leer la salida del dut
-            
-            if(!vif.master_cb.PWRITE)req.rdata = vif.master_cb.PRDATA; //lee los datos de salida del bus de datos y los asigna a la variable rdata de la transacción
+            // wait until PREADY is exactly 1 (avoid exiting early if PREADY is X)
+            do @(vif.master_cb); while(vif.master_cb.PREADY !== 1);
+            `uvm_info(get_type_name(), $sformatf("DRIVER AFTER PREADY: PRDATA=0x%0h PREADY=%0b", vif.master_cb.PRDATA, vif.master_cb.PREADY), UVM_LOW);
+
+            if(!req.write) req.rdata = vif.master_cb.PRDATA[31:0]; //en lectura, captura PRDATA (32 bits)
             req.slverr = vif.master_cb.PSLVERR; //lee el estado de error de la transacción y lo asigna a la variable slverr de la transacción
             vif.master_cb.PSEL <= 0; //desactiva la señal de selección para finalizar la transacción
             vif.master_cb.PENABLE <= 0; //desactiva la señal de enable para finalizar la transacción
@@ -47,7 +50,9 @@ virtual task run_phase (uvm_phase phase); //fase de ejecucion del driver
     forever begin
         drive_idle(); //pone el driver en estado inactivo
         seq_item_port.get_next_item(req); //espera a que se le asigne una transacción desde la secuencia
-        drive_transfer(req); //espera a que se le asigne una transacción desde la secuencia y realiza la transacción en la interfaz APB
+        `uvm_info(get_type_name(), $sformatf("DRIVER GOT REQ: %s", req.convert2string()), UVM_LOW)
+        drive_transfer(req); //realiza la transacción en la interfaz APB
+        `uvm_info(get_type_name(), $sformatf("DRIVER DONE REQ: addr=0x%0h write=%0b rdata=0x%0h slverr=%0b", req.addr, req.write, req.rdata, req.slverr), UVM_LOW)
         seq_item_port.item_done(); //indica que la transacción ha sido completada
     end
 endtask

@@ -8,6 +8,11 @@ class apb_seq_item extends uvm_sequence_item;
 
     function new(string name = "apb_seq_item"); //constructor de la clase
         super.new(name); //llama al constructor de la clase base uvm_sequence_item
+        addr   = '0;
+        data   = '0;
+        write  = 1'b0;
+        rdata  = '0;
+        slverr = 1'b0;
     endfunction
 
     //función para convertir el objeto a una cadena de texto para facilitar la depuración

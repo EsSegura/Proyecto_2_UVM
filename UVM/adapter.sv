@@ -15,9 +15,9 @@ virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
 
 endfunction
 
-virtual function void bus2reg(const ref uvm_sequence_item bus_op, ref uvm_reg_bus_op rw);
+virtual function void bus2reg(input uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     apb_seq_item apb_op;
-    if(!$cast(apb_op, bus_op))
+    if(!$cast(apb_op, bus_item))
         `uvm_fatal("ADAPTER", "Cast fallido")
     rw.addr = apb_op.addr;
     rw.data = apb_op.write ? apb_op.data : apb_op.rdata;

@@ -57,5 +57,11 @@ class monitor_rx extends uvm_monitor;
                     item.data, item.offset, item.size, item.err), UVM_HIGH)
 
         monitor_analysis_port.write(item);
+
+        // Esperamos a que el handshake se libere para no capturar la misma
+        // transacción en la siguiente iteración.
+        while (vif.md_rx_valid === 1'b1 && vif.md_rx_ready === 1'b1) begin
+            @(posedge vif.clk);
+        end
     endtask
 endclass
