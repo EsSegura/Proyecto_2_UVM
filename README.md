@@ -49,11 +49,4 @@ Testbench
 Ambiente
 RAL
 
-Division:
-Seg:
-Configuracion de 1 registro RAL
-ambiente de UVM menos agente de registros
 
-San:
-Toda la estructura de RAL menos la configuracion de 1 registro
-1 Agente de registro
