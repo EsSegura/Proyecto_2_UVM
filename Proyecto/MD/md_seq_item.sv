@@ -14,7 +14,7 @@ class md_seq_item extends uvm_sequence_item;
 
     //rx
     rand logic [31:0] rx_data;    // Datos sin alinear recibidos por el DUT
-    rand logic [2:0]  rx_offset;  // Offset en bytes sobre md_rx_data
+    rand logic [1:0]  rx_offset;  // Offset en bytes sobre md_rx_data
     rand logic [2:0]  rx_size;    // Tamaño en bytes del dato válido
 
     // Respuesta del DUT al  RX
@@ -22,7 +22,7 @@ class md_seq_item extends uvm_sequence_item;
 
     //tx
     logic [31:0] tx_data;
-    logic [2:0]  tx_offset;
+    logic [1:0]  tx_offset;
     logic [2:0]  tx_size;
     logic        tx_err;
 
@@ -32,7 +32,7 @@ class md_seq_item extends uvm_sequence_item;
 
     // size entre 1 y 4 bytes
     constraint c_size_range {
-        rx_size inside {3'h1, 3'h2, 3'h3, 3'h4};
+        rx_size inside {3'h1, 3'h2, 3'h4};
     }
 
     // offset dentro del bus 
