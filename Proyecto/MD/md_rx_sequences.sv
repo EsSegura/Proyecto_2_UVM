@@ -1,59 +1,53 @@
-//secuencia base
+// secuencia base, solo tiene el send_item que reutilizan las demas
 class md_rx_base_seq extends uvm_sequence #(md_seq_item);
 
-    `uvm_object_utils(md_rx_base_seq)
+    `uvm_object_utils(md_rx_base_seq) // registra la secuencia en la fabrica
 
     function new(string name = "md_rx_base_seq");
-        super.new(name);
+        super.new(name); // llama al constructor de la clase base uvm_sequence
     endfunction
 
-    // se crea un ítem, lo aleatoriza con el constraint que se pase,
-    // lo envía y devuelve el ítem completado y con rx_err capturado
+    // randomiza el item y lo entrega al driver
+    // los pesos ya tienen que venir puestos en el item antes de llamar a esta tarea
     protected task send_item(md_seq_item item);
-        start_item(item);
-        if (!item.randomize())
+        start_item(item); // pide permiso al sequencer para enviar el item
+        if (!item.randomize()) // randomiza respetando los constraints
             `uvm_fatal("MD_RX_SEQ", "Falló randomize() del md_seq_item")
-        finish_item(item);
+        finish_item(item); // entrega el item al driver y espera que termine
         `uvm_info(get_type_name(),
             $sformatf("SEQ SENT: %s", item.convert2string()), UVM_HIGH)
     endtask
 
-    // Utilidad: envía un ítem ya construido sin re-randomizar
-    protected task send_prebuilt_item(md_seq_item item);
-        start_item(item);
-        finish_item(item);
-        `uvm_info(get_type_name(),
-            $sformatf("SEQ SENT (prebuilt): %s", item.convert2string()), UVM_HIGH)
+    virtual task body(); // la base no hace nada, la llenan las hijas
     endtask
 
-    protected task send_illegal_item(md_seq_item item);
-        item.c_size_range.constraint_mode(0);
-        item.c_offset_range.constraint_mode(0);
-        item.c_legal_combo.constraint_mode(0);
-
-        item.rx_data   = $urandom;
-        item.rx_offset = 2'h1;
-        item.rx_size   = 3'h3;
-
-        send_prebuilt_item(item);
-    endtask
-
-    virtual task body();
-        // Clase base vacía; las clases derivadas implementan body()
-    endtask
-
-endclass 
+endclass
 
 
-// secuencia de N transferencias legales aleatorias
+// esta secuencia envia N transferencias seguidas, los pesos vienen del test (por plusargs) y se copian a cada item antes de randomizar
+// asi nada queda hardcodeado y se pueden armar varios casos solo cambiando los pesos:
+//   con un solo 1 byte  -> w_size1=100 y los otros en 0
+//   con un solo 4 bytes -> w_size4=100 y los otros en 0
+//  con  solo offset 0 -> w_off0=100 y los otros en 0
+//   con 30% ilegales -> w_illegal=30
 class md_rx_multiple_seq extends md_rx_base_seq;
 
     `uvm_object_utils(md_rx_multiple_seq)
 
-    // Número de transferencias a enviar 
-    int unsigned num_transfers = 8;
-    // Porcentaje de transferencias ilegales a inyectar
-    int unsigned illegal_ratio = 0;
+    int unsigned num_transfers = 8; // cuantas transferencias se envian en total
+
+    // pesos del size (1, 2, 4 bytes)
+    int unsigned w_size1   = 34;
+    int unsigned w_size2   = 33;
+    int unsigned w_size4   = 33;
+
+    // pesos del offset (byte 0 a 3)
+    int unsigned w_off0    = 25;
+    int unsigned w_off1    = 25;
+    int unsigned w_off2    = 25;
+    int unsigned w_off3    = 25;
+
+    int unsigned w_illegal = 0; // peso de transferencias ilegales
 
     function new(string name = "md_rx_multiple_seq");
         super.new(name);
@@ -62,59 +56,35 @@ class md_rx_multiple_seq extends md_rx_base_seq;
     virtual task body();
         md_seq_item item;
 
+        // se imprime la config con la que arranca la secuencia para tenerla en el log
         `uvm_info(get_type_name(),
-            $sformatf("Iniciando secuencia: %0d transferencias RX (illegal_ratio=%0d%%)", num_transfers, illegal_ratio),
+            $sformatf({"Iniciando secuencia: %0d transferencias\n",
+                       "  size  : w1=%0d  w2=%0d  w4=%0d\n",
+                       "  offset: w0=%0d  w1=%0d  w2=%0d  w3=%0d\n",
+                       "  ilegal: w=%0d"},
+                num_transfers,
+                w_size1, w_size2, w_size4,
+                w_off0, w_off1, w_off2, w_off3,
+                w_illegal),
             UVM_LOW)
 
         for (int i = 0; i < num_transfers; i++) begin
-            item = md_seq_item::type_id::create($sformatf("item_%0d", i));
-            if ((illegal_ratio != 0) && ($urandom_range(0, 99) < int'(illegal_ratio)))
-                send_illegal_item(item);
-            else
-                send_item(item);
+            item = md_seq_item::type_id::create($sformatf("item_%0d", i)); // se crea un item nuevo
+
+            // se le pasan los pesos al item para que sus constraints dist los usen
+            item.w_size1   = w_size1;
+            item.w_size2   = w_size2;
+            item.w_size4   = w_size4;
+            item.w_off0    = w_off0;
+            item.w_off1    = w_off1;
+            item.w_off2    = w_off2;
+            item.w_off3    = w_off3;
+            item.w_illegal = w_illegal;
+
+            send_item(item); // se randomiza y se entrega al driver
         end
 
-        `uvm_info(get_type_name(), "Secuencia múltiple completada", UVM_LOW)
+        `uvm_info(get_type_name(), "Secuencia completada", UVM_LOW)
     endtask
 
 endclass
-
-
-// secuencia de transferencia dirigida con valores fijos
-// Permite al test controlar exactamente qué dato, offset y size se envían
-class md_rx_directed_seq extends md_rx_base_seq;
-
-    `uvm_object_utils(md_rx_directed_seq)
-
-    // Valores configurables desde el test
-    logic [31:0] data   = 32'hDEAD_BEEF;
-    logic [2:0]  offset = 3'h0;
-    logic [2:0]  size   = 3'h1; // 1 byte
-
-    function new(string name = "md_rx_directed_seq");
-        super.new(name);
-    endfunction
-
-    virtual task body();
-        md_seq_item item = md_seq_item::type_id::create("directed_item");
-
-        `uvm_info(get_type_name(),
-            $sformatf("Secuencia dirigida: data=0x%08h off=%0d sz=%0d",
-                data, offset, size), UVM_LOW)
-
-        // Desactivar constraints automáticas y asignar valores directamente
-        item.c_size_range.constraint_mode(0);
-        item.c_offset_range.constraint_mode(0);
-        item.c_legal_combo.constraint_mode(0);
-
-        item.rx_data   = data;
-        item.rx_offset = offset;
-        item.rx_size   = size;
-
-        send_prebuilt_item(item);
-
-        `uvm_info(get_type_name(),
-            $sformatf("Dirigida completada: rx_err=%0b", item.rx_err), UVM_LOW)
-    endtask
-
-endclass 

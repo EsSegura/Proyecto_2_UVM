@@ -66,7 +66,19 @@ class aligner_scoreboard extends uvm_scoreboard;
 
         aligned_addr = {trans.addr[15:2], 2'b00};
 
-        // Verificar read-back de CTRL usando el modelo de registros
+        // Escritura a CTRL: actualizar el RAL con predict() para que
+        // SIZE.get() y OFFSET.get() reflejen lo que se escribió en el bus.
+        // La secuencia APB escribe directamente sin pasar por el RAL,
+        // así que el scoreboard es quien lo mantiene sincronizado.
+        if (trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
+            void'(reg_model.CTRL.predict(trans.data));
+            `uvm_info(get_type_name(),
+                $sformatf("SB predict CTRL: SIZE=%0d OFFSET=%0d (data=0x%0h)",
+                    reg_model.CTRL.SIZE.get(), reg_model.CTRL.OFFSET.get(), trans.data),
+                UVM_MEDIUM)
+        end
+
+        // Verificar read-back de CTRL: lo leído debe coincidir con el RAL
         if (!trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
             read_size   = trans.rdata[2:0];
             read_offset = trans.rdata[9:8];
@@ -119,7 +131,8 @@ class aligner_scoreboard extends uvm_scoreboard;
         logic [2:0] ctrl_size_val;
         logic [1:0] ctrl_offset_val;
 
-        // Leer valores actuales desde el modelo de registros
+        // Leer valores actuales desde el modelo de registros (mantenido
+        // sincronizado via predict() en write_apb cada vez que se escribe CTRL)
         ctrl_size_val   = reg_model.CTRL.SIZE.get();
         ctrl_offset_val = reg_model.CTRL.OFFSET.get();
 
