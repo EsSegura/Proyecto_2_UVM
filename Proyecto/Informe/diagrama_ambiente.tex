@@ -1,0 +1,120 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,backgrounds,arrows.meta,calc}
+
+% Capas para anidar las cajas (test detras, agentes al frente)
+\pgfdeclarelayer{lTest}
+\pgfdeclarelayer{lEnv}
+\pgfdeclarelayer{lAgent}
+\pgfsetlayers{lTest,lEnv,lAgent,main}
+
+\begin{document}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  comp/.style={draw,thick,rounded corners=2pt,fill=white,
+    minimum width=18mm,minimum height=9mm,align=center},
+  ifc/.style={draw,thick,fill=red!8,minimum height=6mm,align=center},
+  scb/.style={draw,thick,rounded corners=2pt,fill=orange!18,
+    minimum width=38mm,minimum height=11mm,align=center},
+  ral/.style={draw,thick,rounded corners=2pt,fill=green!16,
+    minimum width=36mm,minimum height=12mm,align=center},
+  asrt/.style={draw,thick,rounded corners=2pt,fill=violet!12,
+    minimum width=44mm,minimum height=11mm,align=center},
+  dut/.style={draw,very thick,fill=gray!18,
+    minimum width=130mm,minimum height=13mm,align=center},
+  tlm/.style={-{Stealth[length=2.2mm]},thick},
+  ana/.style={-{Stealth[length=2.2mm]},semithick,blue!70!black},
+  vif/.style={-{Stealth[length=2.2mm]},thick,dashed,red!70!black},
+  vifb/.style={{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,dashed,red!70!black},
+  ralw/.style={-{Stealth[length=2.2mm]},thick,green!45!black},
+  sva/.style={-{Stealth[length=2.2mm]},thick,violet!60!black},
+  lbl/.style={fill=white,inner sep=1pt,font=\scriptsize},
+]
+
+% =================== Componentes (capa main) ===================
+% --- Agente APB ---
+\node[comp] (apbseqr) at (2.2,11.5) {APB\\sequencer};
+\node[comp] (apbdrv)  at (2.2,9.5)  {APB\\driver};
+\node[comp] (apbmon)  at (4.2,9.5)  {APB\\monitor};
+\node[ifc,minimum width=42mm] (apbif) at (3.2,2.6) {apb\_if};
+
+% --- Agente MD ---
+\node[comp] (mdseqr)  at (9.8,11.5) {MD\\sequencer};
+\node[comp] (mdrx)    at (9.8,9.5)  {RX\\driver};
+\node[comp] (mdmon)   at (12.2,9.5) {MD\\monitor};
+\node[comp] (mdtx)    at (14.6,9.5) {TX\\driver};
+\node[ifc,minimum width=66mm] (mdif) at (12.2,2.6) {md\_if};
+
+% --- Scoreboard + RAL + Assertions ---
+\node[scb]  (scb) at (7.4,7.2) {aligner\_scoreboard};
+\node[ral]  (ral) at (7.4,5.3) {\textbf{RAL}\\{\scriptsize aligner\_apb\_}\\{\scriptsize registerfile\_model}};
+\node[asrt] (svab) at (7.4,3.6) {\textbf{Assertions}};
+
+% --- DUT ---
+\node[dut] (dut) at (7.4,0.3) {DUT — aligner};
+
+% =================== Conexiones ===================
+% --- TLM: sequencer -> driver ---
+\draw[tlm] (apbseqr) -- (apbdrv) node[midway,left,font=\scriptsize]{seq\_item};
+\draw[tlm] (mdseqr)  -- (mdrx)   node[midway,left,font=\scriptsize]{seq\_item};
+
+% --- Interfaz virtual ---
+\draw[vif]  (apbdrv) -- (apbdrv|-apbif.north);
+\draw[vif]  (apbmon|-apbif.north) -- (apbmon);
+\draw[vifb] (apbif.south) -- (apbif.south|-dut.north) node[midway,lbl,left]{apb\_if};
+
+\draw[vif]  (mdrx) -- (mdrx|-mdif.north);
+\draw[vif]  (mdtx) -- (mdtx|-mdif.north);
+\draw[vif]  (mdmon|-mdif.north) -- (mdmon);
+\draw[vifb] (mdif.south) -- (mdif.south|-dut.north) node[midway,lbl,right]{md\_if};
+
+% --- Puertos de analisis: monitor -> scoreboard ---
+\draw[ana] (apbmon.east) |- (scb.west) node[pos=0.32,lbl]{apb\_ap};
+\draw[ana] (mdmon.west)  |- (scb.east) node[pos=0.32,lbl]{rx\_ap\,/\,tx\_ap};
+
+% --- Acceso al RAL ---
+\draw[ralw] ([xshift=-7mm]scb.south) -- ([xshift=-7mm]ral.north) node[midway,left,font=\scriptsize]{predict()};
+\draw[ralw] ([xshift=7mm]ral.north) -- ([xshift=7mm]scb.south)   node[midway,right,font=\scriptsize]{get()};
+
+% --- Assertions: muestreo directo del DUT ---
+\draw[sva] (dut.north -| svab.south) -- (svab.south) node[midway,lbl]{señales DUT};
+
+% =================== Cajas contenedoras (anidadas por capas) ===================
+\begin{pgfonlayer}{lAgent}
+  \node[draw,thick,rounded corners,fill=blue!8,inner sep=5mm,
+        fit=(apbseqr)(apbdrv)(apbmon)] (apbbox) {};
+  \node[draw,thick,rounded corners,fill=teal!8,inner sep=5mm,
+        fit=(mdseqr)(mdrx)(mdmon)(mdtx)] (mdbox) {};
+\end{pgfonlayer}
+\begin{pgfonlayer}{lEnv}
+  \node[draw,thick,rounded corners,fill=blue!4,inner sep=9mm,
+        fit=(apbbox)(mdbox)(scb)(ral)(svab)] (envbox) {};
+\end{pgfonlayer}
+\begin{pgfonlayer}{lTest}
+  \node[draw,very thick,rounded corners,fill=black!4,inner sep=8mm,
+        fit=(envbox)(apbif)(mdif)] (testbox) {};
+\end{pgfonlayer}
+
+% =================== Etiquetas de las cajas (esquina interna) ===================
+\node[anchor=north west,font=\bfseries,xshift=1.5mm,yshift=-1.5mm]
+      at (testbox.north west){aligner\_test};
+\node[anchor=north west,font=\bfseries,xshift=1.5mm,yshift=-1.5mm]
+      at (envbox.north west) {aligner\_env};
+\node[anchor=north west,font=\bfseries\footnotesize,xshift=1.5mm,yshift=-0.5mm]
+      at (apbbox.north west) {apb\_agent};
+\node[anchor=north west,font=\bfseries\footnotesize,xshift=1.5mm,yshift=-0.5mm]
+      at (mdbox.north west)  {md\_agent};
+
+% =================== Leyenda ===================
+\begin{scope}[shift={(0,-0.7)}]
+  \draw[tlm]  (0.3,0)  -- ++(0.8,0) node[right,font=\scriptsize]{TLM seq\_item};
+  \draw[ana]  (3.6,0)  -- ++(0.8,0) node[right,font=\scriptsize]{puerto de análisis};
+  \draw[vifb] (7.3,0)  -- ++(0.8,0) node[right,font=\scriptsize]{interfaz virtual};
+  \draw[ralw] (10.7,0) -- ++(0.8,0) node[right,font=\scriptsize]{acceso RAL};
+  \draw[sva]  (13.6,0) -- ++(0.8,0) node[right,font=\scriptsize]{assertions};
+\end{scope}
+
+\end{tikzpicture}
+\end{document}
