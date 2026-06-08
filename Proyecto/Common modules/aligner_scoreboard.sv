@@ -66,17 +66,10 @@ class aligner_scoreboard extends uvm_scoreboard;
 
         aligned_addr = {trans.addr[15:2], 2'b00};
 
-        // Escritura a CTRL: actualizar el RAL con predict() para que
-        // SIZE.get() y OFFSET.get() reflejen lo que se escribió en el bus.
-        // La secuencia APB escribe directamente sin pasar por el RAL,
-        // así que el scoreboard es quien lo mantiene sincronizado.
-        if (trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
-            void'(reg_model.CTRL.predict(trans.data));
-            `uvm_info(get_type_name(),
-                $sformatf("SB predict CTRL: SIZE=%0d OFFSET=%0d (data=0x%0h)",
-                    reg_model.CTRL.SIZE.get(), reg_model.CTRL.OFFSET.get(), trans.data),
-                UVM_MEDIUM)
-        end
+        // La sincronizacion del RAL la realiza ahora el PREDICTOR EXPLICITO
+        // (uvm_reg_predictor en el env), que observa este mismo monitor APB.
+        // Por eso aqui ya NO se llama predict() manualmente; solo se consulta
+        // el valor reflejado con get() donde haga falta.
 
         // Verificar read-back de CTRL: lo leído debe coincidir con el RAL
         if (!trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin

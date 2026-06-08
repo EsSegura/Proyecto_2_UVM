@@ -22,6 +22,10 @@ virtual function void bus2reg(input uvm_sequence_item bus_item, ref uvm_reg_bus_
     rw.addr = apb_op.addr;
     rw.data = apb_op.write ? apb_op.data : apb_op.rdata;
     rw.kind = (apb_op.write) ? UVM_WRITE : UVM_READ;
+    // si el slave respondio con error (slverr), el acceso fue rechazado:
+    // se marca como NOT_OK para que el predictor NO actualice el RAL con un
+    // valor que el DUT no acepto (p.ej. un CTRL con combinacion ilegal)
+    rw.status = apb_op.slverr ? UVM_NOT_OK : UVM_IS_OK;
 endfunction
 
 

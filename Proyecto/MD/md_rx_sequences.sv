@@ -56,7 +56,9 @@ class md_rx_multiple_seq extends md_rx_base_seq;
     virtual task body();
         md_seq_item item;
 
-        // se imprime la config con la que arranca la secuencia para tenerla en el log
+        // se imprime la config con la que arranca la secuencia (solo en modo debug,
+        // porque el test ya imprime la configuracion completa una sola vez al inicio;
+        // con N_RECONFIG alto este banner se repetiria una vez por bloque)
         `uvm_info(get_type_name(),
             $sformatf({"Iniciando secuencia: %0d transferencias\n",
                        "  size  : w1=%0d  w2=%0d  w4=%0d\n",
@@ -66,7 +68,7 @@ class md_rx_multiple_seq extends md_rx_base_seq;
                 w_size1, w_size2, w_size4,
                 w_off0, w_off1, w_off2, w_off3,
                 w_illegal),
-            UVM_LOW)
+            UVM_HIGH)
 
         for (int i = 0; i < num_transfers; i++) begin
             item = md_seq_item::type_id::create($sformatf("item_%0d", i)); // se crea un item nuevo
@@ -84,7 +86,7 @@ class md_rx_multiple_seq extends md_rx_base_seq;
             send_item(item); // se randomiza y se entrega al driver
         end
 
-        `uvm_info(get_type_name(), "Secuencia completada", UVM_LOW)
+        `uvm_info(get_type_name(), "Secuencia completada", UVM_HIGH)
     endtask
 
 endclass
