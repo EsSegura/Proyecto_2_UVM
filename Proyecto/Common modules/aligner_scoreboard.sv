@@ -71,7 +71,7 @@ class aligner_scoreboard extends uvm_scoreboard;
         // La secuencia APB escribe directamente sin pasar por el RAL,
         // así que el scoreboard es quien lo mantiene sincronizado.
         if (trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
-            void'(reg_model.CTRL.predict(trans.data));
+           // void'(reg_model.CTRL.predict(trans.data));
             `uvm_info(get_type_name(),
                 $sformatf("SB predict CTRL: SIZE=%0d OFFSET=%0d (data=0x%0h)",
                     reg_model.CTRL.SIZE.get(), reg_model.CTRL.OFFSET.get(), trans.data),
