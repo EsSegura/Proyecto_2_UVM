@@ -18,6 +18,14 @@ class aligner_scoreboard extends uvm_scoreboard;
     // cola de bytes RX pendientes de verificar en el TX
     local byte unsigned rx_byte_queue[$];
 
+    // copia local de la configuracion vigente de CTRL en el DUT
+    // se actualiza SOLO con escrituras aceptadas (sin PSLVERR), porque el
+    // predictor del RAL refleja tambien las escrituras ilegales rechazadas
+    // y eso desincronizaria el mirror respecto al hardware real
+    // los valores iniciales son los de reset segun el datasheet
+    local logic [2:0] sb_ctrl_size   = 3'h1;
+    local logic [1:0] sb_ctrl_offset = 2'h0;
+
     // contador de chequeos
     local int unsigned checks_passed;
     local int unsigned checks_failed;
@@ -66,17 +74,46 @@ class aligner_scoreboard extends uvm_scoreboard;
 
         aligned_addr = {trans.addr[15:2], 2'b00};
 
-        // La sincronizacion del RAL la realiza ahora el PREDICTOR EXPLICITO
+        // La sincronizacion del RAL la realiza el PREDICTOR EXPLICITO
         // (uvm_reg_predictor en el env), que observa este mismo monitor APB.
-        // Por eso aqui ya NO se llama predict() manualmente; solo se consulta
-        // el valor reflejado con get() donde haga falta.
+        // Para los chequeos se usa la copia local sb_ctrl_*, que solo toma
+        // las escrituras aceptadas por el DUT.
 
-        // Verificar read-back de CTRL: lo leído debe coincidir con el RAL
+        // Escritura aceptada a CTRL: se actualiza la copia local con lo que
+        // realmente quedo configurado en el DUT
+        if (trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
+            sb_ctrl_size   = trans.data[2:0];
+            sb_ctrl_offset = trans.data[9:8];
+
+            // Al reconfigurar CTRL se vacia la cola de bytes esperados.
+            // El aligner mantiene una palabra parcial en un registro interno
+            // (entre la FIFO RX y la TX) que NO se refleja en RX_LVL/TX_LVL;
+            // al cambiar SIZE/OFFSET esos bytes se reagrupan y la cola quedaria
+            // desfasada. El test drena las FIFOs antes de cada reconfig, asi
+            // que aqui la cola ya deberia estar vacia: el flush la resincroniza
+            // y la verificacion de datos queda acotada a cada config estable.
+            rx_byte_queue.delete();
+
+            `uvm_info(get_type_name(),
+                $sformatf("SB CTRL shadow: SIZE=%0d OFFSET=%0d (data=0x%0h) [cola RX vaciada]",
+                    sb_ctrl_size, sb_ctrl_offset, trans.data),
+                UVM_MEDIUM)
+        end
+
+        // Escritura rechazada a CTRL: el PSLVERR debe corresponder a un combo
+        // realmente ilegal segun la formula del datasheet (o size 0)
+        if (trans.write && (aligned_addr == CTRL_ADDR) && trans.slverr) begin
+            do_check("PSLVERR en CTRL solo con combo ilegal",
+                (trans.data[2:0] == 0) ||
+                (((4 + trans.data[9:8]) % trans.data[2:0]) != 0));
+        end
+
+        // Verificar read-back de CTRL: lo leido debe coincidir con la copia local
         if (!trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
             read_size   = trans.rdata[2:0];
             read_offset = trans.rdata[9:8];
-            do_check("CTRL.SIZE read-back",   (read_size   == reg_model.CTRL.SIZE.get()));
-            do_check("CTRL.OFFSET read-back", (read_offset == reg_model.CTRL.OFFSET.get()));
+            do_check("CTRL.SIZE read-back",   (read_size   == sb_ctrl_size));
+            do_check("CTRL.OFFSET read-back", (read_offset == sb_ctrl_offset));
         end
 
         // Write a STATUS debe devolver PSLVERR
@@ -124,10 +161,10 @@ class aligner_scoreboard extends uvm_scoreboard;
         logic [2:0] ctrl_size_val;
         logic [1:0] ctrl_offset_val;
 
-        // Leer valores actuales desde el modelo de registros (mantenido
-        // sincronizado via predict() en write_apb cada vez que se escribe CTRL)
-        ctrl_size_val   = reg_model.CTRL.SIZE.get();
-        ctrl_offset_val = reg_model.CTRL.OFFSET.get();
+        // Leer la configuracion vigente desde la copia local del scoreboard
+        // (inmune a las escrituras ilegales que el predictor refleja igual)
+        ctrl_size_val   = sb_ctrl_size;
+        ctrl_offset_val = sb_ctrl_offset;
 
         do_check("TX offset == CTRL.OFFSET", (trans.tx_offset == ctrl_offset_val));
         do_check("TX size == CTRL.SIZE",     (trans.tx_size   == ctrl_size_val));

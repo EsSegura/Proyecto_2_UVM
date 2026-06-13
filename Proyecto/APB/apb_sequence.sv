@@ -25,7 +25,12 @@ class apb_sequence extends uvm_sequence #(apb_seq_item);
     // pesos del SIZE de CTRL (se usan cuando op es config de CTRL)
     int unsigned w_ctrl_size1 = 34;
     int unsigned w_ctrl_size2 = 33;
+    int unsigned w_ctrl_size3 = 0;
     int unsigned w_ctrl_size4 = 33;
+
+    // peso de combos ilegales de CTRL (el DUT responde PSLVERR) y del bit CLR
+    int unsigned w_ctrl_illegal = 0;
+    int unsigned w_ctrl_clr     = 0;
 
     // pesos del OFFSET de CTRL
     int unsigned w_ctrl_off0 = 25;
@@ -64,10 +69,12 @@ class apb_sequence extends uvm_sequence #(apb_seq_item);
         uvm_reg_data_t rdata;
 
         //  se obtiene reg_model del config_db antes de usarlo.
-        // El scope es "" para que coincida con el set(this, "*", ...) que hace el env.
-        // Sin este get, reg_model queda null y provoca el error NOA en tiempo de simulacion.
+        // Se usa m_sequencer como contexto porque el env publica el modelo con
+        // set(this, "*", ...), o sea bajo la jerarquia uvm_test_top.env.*, y el
+        // sequencer de este agente si vive dentro de esa jerarquia. Con contexto
+        // null la busqueda parte de la raiz y no encuentra nada.
         if (!uvm_config_db #(aligner_apb_registerfile_model::aligner)::get(
-                null, "", "reg_model", reg_model))
+                m_sequencer, "", "reg_model", reg_model))
             `uvm_fatal("APB_SEQ", "No se pudo obtener reg_model del config_db")
 
         item = apb_seq_item::type_id::create($sformatf("apb_%s", op.name())); // se crea el item
@@ -75,7 +82,10 @@ class apb_sequence extends uvm_sequence #(apb_seq_item);
         // se le pasan todos los pesos al item para que sus constraints los usen
         item.w_ctrl_size1     = w_ctrl_size1;
         item.w_ctrl_size2     = w_ctrl_size2;
+        item.w_ctrl_size3     = w_ctrl_size3;
         item.w_ctrl_size4     = w_ctrl_size4;
+        item.w_ctrl_illegal   = w_ctrl_illegal;
+        item.w_ctrl_clr       = w_ctrl_clr;
         item.w_ctrl_off0      = w_ctrl_off0;
         item.w_ctrl_off1      = w_ctrl_off1;
         item.w_ctrl_off2      = w_ctrl_off2;
@@ -97,12 +107,21 @@ class apb_sequence extends uvm_sequence #(apb_seq_item);
         case (op)
             apb_seq_item::OP_CTRL_CFG,
             apb_seq_item::OP_CTRL_RECONFIG: begin
-                // en CTRL se pone el SIZE en bits[2:0] y el OFFSET en bits[9:8]
-                //  Se usa RAL en lugar de corrimientos manuales, respetando la randomización del item
-                reg_model.CTRL.SIZE.set(item.ctrl_size);
-                reg_model.CTRL.OFFSET.set(item.ctrl_offset);
-                reg_model.CTRL.update(status);
-                item.write = 1'b1; 
+                // en CTRL va el SIZE en bits[2:0], el OFFSET en bits[9:8] y el CLR en el bit 16
+                // se usa write() en vez de update() por dos razones:
+                //   1) update() no genera acceso al bus si el valor deseado coincide con el
+                //      mirror, asi que una reconfig con el mismo valor quedaria sin escribirse
+                //   2) write() permite mandar combos ilegales a proposito para que el DUT
+                //      responda con PSLVERR y se cubran los bins ilegales del registro
+                uvm_reg_data_t wval;
+                wval      = '0;
+                wval[2:0] = item.ctrl_size;
+                wval[9:8] = item.ctrl_offset;
+                wval[16]  = item.do_ctrl_clr;
+                reg_model.CTRL.write(status, wval, UVM_FRONTDOOR);
+                item.addr  = 'h0;
+                item.data  = wval;
+                item.write = 1'b1;
             end
 
             apb_seq_item::OP_IRQEN_CFG: begin

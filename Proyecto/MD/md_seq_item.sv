@@ -18,6 +18,7 @@ class md_seq_item extends uvm_sequence_item;
     // ejemplo: si pongo w_size4=100 y los otros en 0, siempre saldra size 4
     int unsigned w_size1 = 34;  // peso para size de 1 byte
     int unsigned w_size2 = 33;  // peso para size de 2 bytes
+    int unsigned w_size3 = 0;   // peso para size de 3 bytes (solo legal con offset 2, por la formula del datasheet)
     int unsigned w_size4 = 33;  // peso para size de 4 bytes
 
     // pesos para el offset (de 0 a 3), funcionan igual que los de arriba
@@ -52,7 +53,9 @@ class md_seq_item extends uvm_sequence_item;
     }
 
 
-    // si es legal uso la distribucion ponderada entre 1, 2 y 4
+    // si es legal se usa la distribucion ponderada entre 1, 2, 3 y 4
+    // (el size 3 solo es legal con offset 2 porque (4+2)%3 == 0, el constraint
+    // c_legal_combo se encarga de forzar ese offset cuando sale size 3 legal)
     // si es ilegal se saca de un pool de valores que rompen las reglas (0, 2, 3, 4)
     // ojo: el size 1 no entra al pool ilegal porque siempre es legal con cualquier offset
     // tampoco se deja pasar mas de 4 porque el bus es de 32 bits (4 bytes maximo)
@@ -61,6 +64,7 @@ class md_seq_item extends uvm_sequence_item;
         if (!is_illegal)
             rx_size dist { 3'h1 := w_size1,
                            3'h2 := w_size2,
+                           3'h3 := w_size3,
                            3'h4 := w_size4 };
         else
             rx_size inside {3'h0, 3'h2, 3'h3, 3'h4};

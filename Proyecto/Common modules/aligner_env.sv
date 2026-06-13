@@ -8,6 +8,7 @@ class aligner_env extends uvm_env;
     apb_adapter                                   reg_adapter;
     uvm_reg_predictor #(apb_seq_item)             apb_predictor; // predictor explicito
     aligner_reg_cov                               reg_model;     // modelo RAL con cobertura
+    aligner_md_coverage                           md_cov;        // collector de cobertura del canal MD
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -20,6 +21,7 @@ class aligner_env extends uvm_env;
         apb_agt    = apb_agent::type_id::create("apb_agt",    this);
         md_agt     = md_agent::type_id::create("md_agt",      this);
         scoreboard = aligner_scoreboard::type_id::create("scoreboard", this);
+        md_cov     = aligner_md_coverage::type_id::create("md_cov", this); // cobertura MD
         reg_adapter = apb_adapter::type_id::create("reg_adapter");
         // predictor explicito: convierte lo que observa el monitor APB en
         // accesos al RAL para actualizar el valor reflejado y la cobertura
@@ -63,6 +65,10 @@ class aligner_env extends uvm_env;
         // conexion del monitor MD al scoreboard
         md_agt.ap_rx.connect(scoreboard.md_rx_ap);
         md_agt.ap_tx.connect(scoreboard.md_tx_ap);
+
+        // conexion del monitor MD al collector de cobertura (en paralelo al scoreboard)
+        md_agt.ap_rx.connect(md_cov.rx_ap);
+        md_agt.ap_tx.connect(md_cov.tx_ap);
     endfunction
 
 endclass : aligner_env

@@ -30,10 +30,14 @@ import aligner_apb_registerfile_model::*;
 `include "md_agent.sv"
 `include "md_rx_sequences.sv"
 
-//Scoreboard, env, test
+//Scoreboard, cobertura, env, test
 `include "aligner_scoreboard.sv"
+`include "aligner_md_coverage.sv" // collector de cobertura funcional del canal MD
 `include "aligner_env.sv"
 `include "aligner_test.sv"
+
+//Assertions (modulo SVA que se conecta directo a las senales del DUT)
+`include "aligner_assertions.sv"
 
 //DUT
 `include "design.sv"
@@ -111,6 +115,38 @@ module aligner_tb_top;
 
         // IRQ
         .irq        ()
+    );
+
+    // modulo de assertions, pegado directo a las senales del DUT
+    aligner_assertions #(
+        .ADDR_WIDTH(16),
+        .DATA_WIDTH(ALGN_DATA_WIDTH)
+    ) assertions (
+        .clk         (clk),
+        .reset_n     (reset_n),
+
+        // APB
+        .psel        (apb_bus.PSEL),
+        .penable     (apb_bus.PENABLE),
+        .pwrite      (apb_bus.PWRITE),
+        .pready      (apb_bus.PREADY),
+        .pslverr     (apb_bus.PSLVERR),
+        .paddr       (apb_bus.PADDR),
+        .pwdata      (apb_bus.PWDATA),
+
+        // MD RX
+        .md_rx_valid (md_bus.md_rx_valid),
+        .md_rx_ready (md_bus.md_rx_ready),
+        .md_rx_err   (md_bus.md_rx_err),
+        .md_rx_size  (md_bus.md_rx_size),
+        .md_rx_offset(md_bus.md_rx_offset),
+
+        // MD TX
+        .md_tx_valid (md_bus.md_tx_valid),
+        .md_tx_ready (md_bus.md_tx_ready),
+        .md_tx_err   (md_bus.md_tx_err),
+        .md_tx_size  (md_bus.md_tx_size),
+        .md_tx_offset(md_bus.md_tx_offset)
     );
 
 

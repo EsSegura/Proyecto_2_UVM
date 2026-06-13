@@ -36,9 +36,10 @@ class md_rx_multiple_seq extends md_rx_base_seq;
 
     int unsigned num_transfers = 8; // cuantas transferencias se envian en total
 
-    // pesos del size (1, 2, 4 bytes)
+    // pesos del size (1, 2, 3, 4 bytes)
     int unsigned w_size1   = 34;
     int unsigned w_size2   = 33;
+    int unsigned w_size3   = 0;
     int unsigned w_size4   = 33;
 
     // pesos del offset (byte 0 a 3)
@@ -61,11 +62,11 @@ class md_rx_multiple_seq extends md_rx_base_seq;
         // con N_RECONFIG alto este banner se repetiria una vez por bloque)
         `uvm_info(get_type_name(),
             $sformatf({"Iniciando secuencia: %0d transferencias\n",
-                       "  size  : w1=%0d  w2=%0d  w4=%0d\n",
+                       "  size  : w1=%0d  w2=%0d  w3=%0d  w4=%0d\n",
                        "  offset: w0=%0d  w1=%0d  w2=%0d  w3=%0d\n",
                        "  ilegal: w=%0d"},
                 num_transfers,
-                w_size1, w_size2, w_size4,
+                w_size1, w_size2, w_size3, w_size4,
                 w_off0, w_off1, w_off2, w_off3,
                 w_illegal),
             UVM_HIGH)
@@ -76,6 +77,7 @@ class md_rx_multiple_seq extends md_rx_base_seq;
             // se le pasan los pesos al item para que sus constraints dist los usen
             item.w_size1   = w_size1;
             item.w_size2   = w_size2;
+            item.w_size3   = w_size3;
             item.w_size4   = w_size4;
             item.w_off0    = w_off0;
             item.w_off1    = w_off1;
