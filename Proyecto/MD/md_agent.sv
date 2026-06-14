@@ -1,26 +1,19 @@
-// Agente MD.
-// Encapsula todos los componentes relacionados con la interfaz MD:
+// Ambos agentes tanto de RX como de TX unidos:
 //   - md_rx_driver  : conduce estímulos hacia el canal RX del DUT.
 //   - md_tx_driver  : mantiene md_tx_ready/err hacia el canal TX del DUT.
 //   - md_monitor    : observa pasivamente RX y TX.
 //   - sequencer     : genera ítems para el driver RX.
-//
-// El agente puede operar en modo ACTIVE (con drivers y secuenciador)
-// o PASSIVE (solo monitor).
 class md_agent extends uvm_agent;
 
     `uvm_component_utils(md_agent)
 
-    // Modo activo/pasivo heredado de uvm_agent
-    // is_active = UVM_ACTIVE por defecto
-
-    // Sub-componentes
+    // Subcomponentes
     md_rx_driver                 rx_driver;
     md_tx_driver                 tx_driver;
     md_monitor                   monitor;
     uvm_sequencer #(md_seq_item) sequencer;
 
-    // Puertos de análisis expuestos al ambiente (re-exportados del monitor)
+    // Puertos de análisis 
     uvm_analysis_port #(md_seq_item) ap_rx;
     uvm_analysis_port #(md_seq_item) ap_tx;
 
@@ -28,9 +21,7 @@ class md_agent extends uvm_agent;
         super.new(name, parent);
     endfunction
 
-    // -----------------------------------------------------------------------
-    // build_phase
-    // -----------------------------------------------------------------------
+
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
@@ -48,9 +39,7 @@ class md_agent extends uvm_agent;
         end
     endfunction
 
-    // -----------------------------------------------------------------------
-    // connect_phase
-    // -----------------------------------------------------------------------
+
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
 
@@ -61,9 +50,10 @@ class md_agent extends uvm_agent;
         if (is_active == UVM_ACTIVE) begin
             // Conectar el secuenciador al driver RX
             rx_driver.seq_item_port.connect(sequencer.seq_item_export);
-            // Conectar el secuenciador al driver TX también (evita warning DRVCONNECT)
+            // se conecta el secuenciador al driver TX también aunque no se use, para evitar warnings de conexión no utilizada en el log 
+            // se podria debuggear esto para eliminar la conexion y que quede limpio
             tx_driver.seq_item_port.connect(sequencer.seq_item_export);
         end
     endfunction
 
-endclass : md_agent
+endclass 

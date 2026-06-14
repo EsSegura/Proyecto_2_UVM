@@ -1,83 +1,54 @@
-// ============================================================================
-// Secuencias del canal RX del protocolo MD.
-//
-// Jerarquía:
-//   md_rx_base_seq        – clase base con utilidades comunes
-//   md_rx_single_seq      – envía una transferencia legal aleatoria
-//   md_rx_multiple_seq    – envía N transferencias legales aleatorias
-//   md_rx_directed_seq    – envía una transferencia con valores fijos (dirigida)
-//   md_rx_illegal_seq     – envía una transferencia con combo (offset,size) ilegal
-//                           para verificar que el DUT responda con md_rx_err=1
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// Clase base: herramienta de conveniencia para crear y enviar ítems
-// ----------------------------------------------------------------------------
+// secuencia base, solo tiene el send_item que reutilizan las demas
 class md_rx_base_seq extends uvm_sequence #(md_seq_item);
 
-    `uvm_object_utils(md_rx_base_seq)
+    `uvm_object_utils(md_rx_base_seq) // registra la secuencia en la fabrica
 
     function new(string name = "md_rx_base_seq");
-        super.new(name);
+        super.new(name); // llama al constructor de la clase base uvm_sequence
     endfunction
 
-    // Utilidad: crea un ítem, lo aleatoriza con el constraint que se pase,
-    // lo envía y devuelve el ítem completado (con rx_err capturado).
+    // randomiza el item y lo entrega al driver
+    // los pesos ya tienen que venir puestos en el item antes de llamar a esta tarea
     protected task send_item(md_seq_item item);
-        start_item(item);
-        if (!item.randomize())
+        start_item(item); // pide permiso al sequencer para enviar el item
+        if (!item.randomize()) // randomiza respetando los constraints
             `uvm_fatal("MD_RX_SEQ", "Falló randomize() del md_seq_item")
-        finish_item(item);
+        finish_item(item); // entrega el item al driver y espera que termine
         `uvm_info(get_type_name(),
             $sformatf("SEQ SENT: %s", item.convert2string()), UVM_HIGH)
     endtask
 
-    // Utilidad: envía un ítem ya construido sin re-randomizar
-    protected task send_prebuilt_item(md_seq_item item);
-        start_item(item);
-        finish_item(item);
-        `uvm_info(get_type_name(),
-            $sformatf("SEQ SENT (prebuilt): %s", item.convert2string()), UVM_HIGH)
+    virtual task body(); // la base no hace nada, la llenan las hijas
     endtask
 
-    virtual task body();
-        // Clase base vacía; las clases derivadas implementan body()
-    endtask
-
-endclass : md_rx_base_seq
+endclass
 
 
-// ----------------------------------------------------------------------------
-// Secuencia: una sola transferencia legal aleatoria
-// ----------------------------------------------------------------------------
-class md_rx_single_seq extends md_rx_base_seq;
-
-    `uvm_object_utils(md_rx_single_seq)
-
-    function new(string name = "md_rx_single_seq");
-        super.new(name);
-    endfunction
-
-    virtual task body();
-        md_seq_item item = md_seq_item::type_id::create("item");
-        `uvm_info(get_type_name(), "Iniciando secuencia: transferencia RX única legal", UVM_LOW)
-        send_item(item);
-        `uvm_info(get_type_name(),
-            $sformatf("Transferencia completada: rx_err=%0b", item.rx_err), UVM_LOW)
-    endtask
-
-endclass : md_rx_single_seq
-
-
-// ----------------------------------------------------------------------------
-// Secuencia: N transferencias legales aleatorias
-// ----------------------------------------------------------------------------
+// esta secuencia envia N transferencias seguidas, los pesos vienen del test (por plusargs) y se copian a cada item antes de randomizar
+// asi nada queda hardcodeado y se pueden armar varios casos solo cambiando los pesos:
+//   con un solo 1 byte  -> w_size1=100 y los otros en 0
+//   con un solo 4 bytes -> w_size4=100 y los otros en 0
+//  con  solo offset 0 -> w_off0=100 y los otros en 0
+//   con 30% ilegales -> w_illegal=30
 class md_rx_multiple_seq extends md_rx_base_seq;
 
     `uvm_object_utils(md_rx_multiple_seq)
 
-    // Número de transferencias a enviar (configurable desde el test)
-    int unsigned num_transfers = 8;
+    int unsigned num_transfers = 8; // cuantas transferencias se envian en total
+
+    // pesos del size (1, 2, 3, 4 bytes)
+    int unsigned w_size1   = 34;
+    int unsigned w_size2   = 33;
+    int unsigned w_size3   = 0;
+    int unsigned w_size4   = 33;
+
+    // pesos del offset (byte 0 a 3)
+    int unsigned w_off0    = 25;
+    int unsigned w_off1    = 25;
+    int unsigned w_off2    = 25;
+    int unsigned w_off3    = 25;
+
+    int unsigned w_illegal = 0; // peso de transferencias ilegales
 
     function new(string name = "md_rx_multiple_seq");
         super.new(name);
@@ -86,106 +57,38 @@ class md_rx_multiple_seq extends md_rx_base_seq;
     virtual task body();
         md_seq_item item;
 
+        // se imprime la config con la que arranca la secuencia (solo en modo debug,
+        // porque el test ya imprime la configuracion completa una sola vez al inicio;
+        // con N_RECONFIG alto este banner se repetiria una vez por bloque)
         `uvm_info(get_type_name(),
-            $sformatf("Iniciando secuencia: %0d transferencias RX legales", num_transfers),
-            UVM_LOW)
+            $sformatf({"Iniciando secuencia: %0d transferencias\n",
+                       "  size  : w1=%0d  w2=%0d  w3=%0d  w4=%0d\n",
+                       "  offset: w0=%0d  w1=%0d  w2=%0d  w3=%0d\n",
+                       "  ilegal: w=%0d"},
+                num_transfers,
+                w_size1, w_size2, w_size3, w_size4,
+                w_off0, w_off1, w_off2, w_off3,
+                w_illegal),
+            UVM_HIGH)
 
         for (int i = 0; i < num_transfers; i++) begin
-            item = md_seq_item::type_id::create($sformatf("item_%0d", i));
-            send_item(item);
+            item = md_seq_item::type_id::create($sformatf("item_%0d", i)); // se crea un item nuevo
+
+            // se le pasan los pesos al item para que sus constraints dist los usen
+            item.w_size1   = w_size1;
+            item.w_size2   = w_size2;
+            item.w_size3   = w_size3;
+            item.w_size4   = w_size4;
+            item.w_off0    = w_off0;
+            item.w_off1    = w_off1;
+            item.w_off2    = w_off2;
+            item.w_off3    = w_off3;
+            item.w_illegal = w_illegal;
+
+            send_item(item); // se randomiza y se entrega al driver
         end
 
-        `uvm_info(get_type_name(), "Secuencia múltiple completada", UVM_LOW)
+        `uvm_info(get_type_name(), "Secuencia completada", UVM_HIGH)
     endtask
 
-endclass : md_rx_multiple_seq
-
-
-// ----------------------------------------------------------------------------
-// Secuencia: transferencia dirigida con valores fijos
-// Permite al test controlar exactamente qué dato, offset y size se envían.
-// ----------------------------------------------------------------------------
-class md_rx_directed_seq extends md_rx_base_seq;
-
-    `uvm_object_utils(md_rx_directed_seq)
-
-    // Valores configurables desde el test
-    logic [31:0] data   = 32'hDEAD_BEEF;
-    logic [2:0]  offset = 3'h0;
-    logic [2:0]  size   = 3'h1; // 1 byte
-
-    function new(string name = "md_rx_directed_seq");
-        super.new(name);
-    endfunction
-
-    virtual task body();
-        md_seq_item item = md_seq_item::type_id::create("directed_item");
-
-        `uvm_info(get_type_name(),
-            $sformatf("Secuencia dirigida: data=0x%08h off=%0d sz=%0d",
-                data, offset, size), UVM_LOW)
-
-        // Desactivar constraints automáticas y asignar valores directamente
-        item.c_size_range.constraint_mode(0);
-        item.c_offset_range.constraint_mode(0);
-        item.c_legal_combo.constraint_mode(0);
-
-        item.rx_data   = data;
-        item.rx_offset = offset;
-        item.rx_size   = size;
-
-        send_prebuilt_item(item);
-
-        `uvm_info(get_type_name(),
-            $sformatf("Dirigida completada: rx_err=%0b", item.rx_err), UVM_LOW)
-    endtask
-
-endclass : md_rx_directed_seq
-
-
-// ----------------------------------------------------------------------------
-// Secuencia: transferencia ilegal
-// Envía una combinación (offset, size) que NO satisface la ecuación:
-//   ((ALGN_DATA_WIDTH/8) + offset) % size == 0
-// El DUT debe responder con md_rx_err=1.
-// ----------------------------------------------------------------------------
-class md_rx_illegal_seq extends md_rx_base_seq;
-
-    `uvm_object_utils(md_rx_illegal_seq)
-
-    // Por defecto genera un combo ilegal conocido:
-    // (4 + 1) % 3 = 2  ≠ 0  → ilegal para DATA_WIDTH=32
-    logic [31:0] data         = 32'hBAD_C0FFE;
-    logic [2:0]  bad_offset   = 3'h1;
-    logic [2:0]  bad_size     = 3'h3;
-
-    function new(string name = "md_rx_illegal_seq");
-        super.new(name);
-    endfunction
-
-    virtual task body();
-        md_seq_item item = md_seq_item::type_id::create("illegal_item");
-
-        `uvm_info(get_type_name(),
-            $sformatf("Secuencia ILEGAL: data=0x%08h off=%0d sz=%0d → esperando rx_err=1",
-                data, bad_offset, bad_size), UVM_LOW)
-
-        // Deshabilitar todas las constraints y forzar combo ilegal
-        item.c_size_range.constraint_mode(0);
-        item.c_offset_range.constraint_mode(0);
-        item.c_legal_combo.constraint_mode(0);
-
-        item.rx_data   = data;
-        item.rx_offset = bad_offset;
-        item.rx_size   = bad_size;
-
-        send_prebuilt_item(item);
-
-        if (item.rx_err !== 1'b1)
-            `uvm_error(get_type_name(),
-                "FALLO: se esperaba rx_err=1 para transferencia ilegal")
-        else
-            `uvm_info(get_type_name(), "OK: DUT respondió con rx_err=1", UVM_LOW)
-    endtask
-
-endclass : md_rx_illegal_seq
+endclass

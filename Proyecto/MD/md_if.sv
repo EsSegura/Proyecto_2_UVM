@@ -44,4 +44,4 @@ interface md_if #(
         input md_tx_ready, md_tx_err;
     endclocking
 
-endinterface : md_if
+endinterface 

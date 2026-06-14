@@ -83,4 +83,4 @@ class md_monitor extends uvm_monitor;
         end
     endtask
 
-endclass : md_monitor
+endclass 

@@ -50,7 +50,8 @@ class md_rx_driver extends uvm_driver #(md_seq_item);
         // se esperar handshake, para leer md_rx_ready directo del wire
         do begin
             @(vif.rx_driver_cb);
-        end while (vif.md_rx_ready !== 1'b1);
+ //       end while (vif.md_rx_ready !== 1'b1);
+end while (vif.rx_driver_cb.md_rx_ready !== 1'b1);// temporal, para ver si se quita el error de la asercion (leer md_rx_ready directamente del clocking block de la if en lugar del wire)
 
         // capturar error directamente del wire de la interfaz
         req.rx_err = vif.md_rx_err;
