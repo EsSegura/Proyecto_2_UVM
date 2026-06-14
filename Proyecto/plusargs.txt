@@ -68,10 +68,9 @@
 //+TX_READY_WEIGHT=100
 //+W_CTRL_SIZE1=34  +W_CTRL_SIZE2=33  +W_CTRL_SIZE3=0  +W_CTRL_SIZE4=33
 //+W_CTRL_OFF0=25   +W_CTRL_OFF1=25   +W_CTRL_OFF2=25  +W_CTRL_OFF3=25
-//+W_CTRL_ILLEGAL=0 +W_CTRL_CLR=0
-
-
-
+//+W_CTRL_ILLEGAL=0 
+//+W_CTRL_CLR=0
+ 
 // ============================================================================
 //  ESCENARIOS DEL PLAN DE PRUEBAS
 //  (descomentar uno y comentar el bloque "ESCENARIO ACTIVO" de arriba)

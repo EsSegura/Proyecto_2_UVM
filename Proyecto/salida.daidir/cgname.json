@@ -1,0 +1,98 @@
+{
+    "_vcs_DPI_package": [
+        "_vcs_DPI_package",
+        "uM9F1",
+        "module",
+        1
+    ],
+    "vcs_paramclassrepository": [
+        "vcs_paramclassrepository",
+        "hEeZs",
+        "module",
+        2
+    ],
+    "_vcs_unit__2228767283": [
+        "_vcs_unit__2228767283",
+        "hWmQj",
+        "module",
+        3
+    ],
+    "std": [
+        "std",
+        "reYIK",
+        "module",
+        4
+    ],
+    "uvm_pkg": [
+        "uvm_pkg",
+        "zr7M1",
+        "module",
+        5
+    ],
+    "_vcs_msglog": [
+        "_vcs_msglog",
+        "zQBzV",
+        "module",
+        6
+    ],
+    "uvm_custom_install_recording": [
+        "uvm_custom_install_recording",
+        "nhiwz",
+        "module",
+        7
+    ],
+    "uvm_custom_install_verdi_recording": [
+        "uvm_custom_install_verdi_recording",
+        "EbjT3",
+        "module",
+        8
+    ],
+    "aligner_apb_registerfile_model": [
+        "aligner_apb_registerfile_model",
+        "V5LpJ",
+        "module",
+        9
+    ],
+    "apb_if": [
+        "apb_if",
+        "d9vZk",
+        "module",
+        10
+    ],
+    "md_if": [
+        "md_if",
+        "RwNmy",
+        "module",
+        11
+    ],
+    "aligner_assertions": [
+        "aligner_assertions",
+        "gz6tk",
+        "module",
+        12
+    ],
+    "cfs_synch_fifo_0000": [
+        "cfs_synch_fifo_0000",
+        "Ex7vL",
+        "module",
+        13
+    ],
+    "cfs_aligner": [
+        "cfs_aligner",
+        "xf59P",
+        "module",
+        14
+    ],
+    "aligner_tb_top": [
+        "aligner_tb_top",
+        "KiaRf",
+        "module",
+        15
+    ],
+    "...MASTER...": [
+        "SIM",
+        "amcQw",
+        "module",
+        16
+    ]
+}
