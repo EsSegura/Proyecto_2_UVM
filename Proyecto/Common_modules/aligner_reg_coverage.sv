@@ -2,13 +2,7 @@
 import uvm_pkg::*;
 import aligner_apb_registerfile_model::*;
 
-// NOTA sobre el muestreo: el predictor explicito llama sample() ANTES de
-// actualizar el mirror del registro, asi que si los covergroups leyeran
-// campo.value verian el valor del acceso anterior (cobertura corrida un
-// acceso). Por eso cada clase guarda en variables smp_* lo que vino en el
-// argumento data (el valor real del bus) y los coverpoints muestrean eso.
-
-class aligner__CTRL_cov extends aligner__CTRL;//clase que hereda los fields del modelo del registro de control generado por RAL, para generar cobertura
+class aligner__CTRL_cov extends aligner__CTRL; //clase que hereda los fields del modelo del registro de control generado por RAL, para generar cobertura
   `uvm_object_utils(aligner__CTRL_cov)
 
   // valores del acceso actual en el bus (ver NOTA de arriba)

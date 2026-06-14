@@ -1,7 +1,7 @@
 class apb_driver extends uvm_driver #(apb_seq_item);
 
-`uvm_component_utils(apb_driver); // se registra el driver en la fabrica 
-virtual apb_if vif; // handle de la interfaz virtual para comunicarse en el dut
+`uvm_component_utils(apb_driver); //se registra el driver en la fabrica
+virtual apb_if vif; //handle de la interfaz virtual para comunicarse en el dut
 
 //constructor del driver
 function new(string name, uvm_component parent);
@@ -15,6 +15,7 @@ function void build_phase(uvm_phase phase); //fase de construcción del driver
     end
 endfunction
 
+        //deja el bus en reposo entre transacciones para no mandar accesos no deseados al DUT
         task drive_idle();
             vif.master_cb.PSEL <= 0; //desactiva la señal de selección para finalizar la transacción
             vif.master_cb.PWRITE <= 0; //restablece el bus de control a un estado inactivo
@@ -24,18 +25,19 @@ endfunction
             @(vif.master_cb); //se esperar para sincronizar con el reloj antes de continuar
         endtask
 
+        //ejecuta una transaccion APB completa (fase setup y fase access)
         task drive_transfer(apb_seq_item req);
-            // fase de setup: se asignan las señales de dirección, control y datos para iniciar la transacción
-            // truncate address/data to interface widths (APB_ADDR_WIDTH=16, APB_DATA_WIDTH=32)
+            //fase de setup: se asignan las señales de dirección, control y datos para iniciar la transacción
+            //se truncan dirección y dato al ancho de la interfaz (APB_ADDR_WIDTH=16, APB_DATA_WIDTH=32)
             vif.master_cb.PADDR <= req.addr[15:0]; //asigna la dirección de la transacción al bus de direcciones (16 bits)
             vif.master_cb.PWRITE <= req.write; //asigna el  tipo de operación (lectura o escritura) al bus de control
             vif.master_cb.PWDATA <= req.data[31:0]; //asigna los datos de la transacción al bus de datos (32 bits)
             vif.master_cb.PSEL <= 1; //activa la señal de selección para iniciar la transacción
             vif.master_cb.PENABLE <= 0; //asegura que la señal de enable esté desactivada durante la fase de setup
             @(vif.master_cb); //espera un ciclo de reloj para iniciar la fase access
-            // fase de access 
+            //fase de access
             vif.master_cb.PENABLE <= 1; //activa la señal de enable para que la transacción se ejecute
-            // wait until PREADY is exactly 1 (avoid exiting early if PREADY is X)
+            //se espera hasta que PREADY sea exactamente 1 (para no salir antes si PREADY esta en X)
             do @(vif.master_cb); while(vif.master_cb.PREADY !== 1);
             `uvm_info(get_type_name(), $sformatf("DRIVER AFTER PREADY: PRDATA=0x%0h PREADY=%0b", vif.master_cb.PRDATA, vif.master_cb.PREADY), UVM_LOW);
 
