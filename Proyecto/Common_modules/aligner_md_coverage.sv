@@ -23,7 +23,7 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             bins size_0 = {3'h0}; // size=0: siempre ilegal
             bins size_1 = {3'h1};
             bins size_2 = {3'h2};
-            bins size_3 = {3'h3}; // size=3: siempre ilegal
+            bins size_3 = {3'h3}; // size=3: solo legal con offset=2, porque (4+2)%3 == 0
             bins size_4 = {3'h4};
         }
 
@@ -52,6 +52,8 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             // size=2: offset 0 y 2 son validos
             bins legal_s2_o0 = binsof(cp_rx_size.size_2) && binsof(cp_rx_offset.off_0);
             bins legal_s2_o2 = binsof(cp_rx_size.size_2) && binsof(cp_rx_offset.off_2);
+            // size=3: solo offset=2 es valido por la formula (4+2)%3 == 0
+            bins legal_s3_o2 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_2);
             // size=4: solo offset=0
             bins legal_s4_o0 = binsof(cp_rx_size.size_4) && binsof(cp_rx_offset.off_0);
         }
@@ -64,9 +66,9 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             bins ilegal_s0_o3 = binsof(cp_rx_size.size_0) && binsof(cp_rx_offset.off_3);
             bins ilegal_s2_o1 = binsof(cp_rx_size.size_2) && binsof(cp_rx_offset.off_1);
             bins ilegal_s2_o3 = binsof(cp_rx_size.size_2) && binsof(cp_rx_offset.off_3);
-            bins ilegal_s3_o0 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_0); // size=3 siempre ilegal
+            // size=3 es ilegal con todos los offsets menos el 2 (ese es legal)
+            bins ilegal_s3_o0 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_0);
             bins ilegal_s3_o1 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_1);
-            bins ilegal_s3_o2 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_2);
             bins ilegal_s3_o3 = binsof(cp_rx_size.size_3) && binsof(cp_rx_offset.off_3);
             bins ilegal_s4_o1 = binsof(cp_rx_size.size_4) && binsof(cp_rx_offset.off_1);
             bins ilegal_s4_o2 = binsof(cp_rx_size.size_4) && binsof(cp_rx_offset.off_2);
@@ -80,10 +82,11 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             // Transferencias legales no deben tener error
             bins ok_s1  = binsof(cp_rx_err.no_error) && binsof(cp_rx_size.size_1);
             bins ok_s2  = binsof(cp_rx_err.no_error) && binsof(cp_rx_size.size_2);
+            bins ok_s3  = binsof(cp_rx_err.no_error) && binsof(cp_rx_size.size_3); // size=3 con offset=2
             bins ok_s4  = binsof(cp_rx_err.no_error) && binsof(cp_rx_size.size_4);
             // Transferencias ilegales deben tener error
             bins err_s0 = binsof(cp_rx_err.error) && binsof(cp_rx_size.size_0);
-            bins err_s3 = binsof(cp_rx_err.error) && binsof(cp_rx_size.size_3);
+            bins err_s3 = binsof(cp_rx_err.error) && binsof(cp_rx_size.size_3); // size=3 con offset != 2
         }
 
     endgroup : rx_cg
@@ -95,6 +98,7 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
         cp_tx_size: coverpoint trans_tx.tx_size {
             bins size_1 = {3'h1};
             bins size_2 = {3'h2};
+            bins size_3 = {3'h3}; // sale cuando CTRL queda en size=3, offset=2
             bins size_4 = {3'h4};
         }
 
@@ -106,10 +110,12 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             bins off_3 = {2'h3};
         }
 
-        // El DUT saco un paquete con error en TX (tx_err=1)
+        // El DUT nunca saca un paquete con error en TX (lo garantiza la
+        // asercion a_tx_sin_error), asi que el valor 1 es inalcanzable por
+        // diseno: se marca como ignore_bins para que no penalice la cobertura
         cp_tx_err: coverpoint trans_tx.tx_err {
-            bins no_error = {1'b0};
-            bins error    = {1'b1};
+            bins no_error      = {1'b0};
+            ignore_bins jamas  = {1'b1};
         }
 
         // Pares (size, offset) que deben salir por TX segun las configuraciones
@@ -121,6 +127,7 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
             bins tx_s1_o3 = binsof(cp_tx_size.size_1) && binsof(cp_tx_offset.off_3);
             bins tx_s2_o0 = binsof(cp_tx_size.size_2) && binsof(cp_tx_offset.off_0);
             bins tx_s2_o2 = binsof(cp_tx_size.size_2) && binsof(cp_tx_offset.off_2);
+            bins tx_s3_o2 = binsof(cp_tx_size.size_3) && binsof(cp_tx_offset.off_2);
             bins tx_s4_o0 = binsof(cp_tx_size.size_4) && binsof(cp_tx_offset.off_0);
         }
 
@@ -169,5 +176,8 @@ class aligner_md_coverage extends uvm_subscriber #(md_seq_item);
     // No se usa porque manejamos los dos puertos manualmente
     virtual function void write(md_seq_item t);
     endfunction
+
+    // el resumen de cobertura MD lo imprime el report_phase del test,
+    // que accede a rx_cg y tx_cg a traves de env.md_cov
 
 endclass : aligner_md_coverage

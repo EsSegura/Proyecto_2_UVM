@@ -32,14 +32,24 @@ class apb_seq_item extends uvm_sequence_item;
     logic [31:0]      rdata;  // dato leido (lo rellena el driver en las lecturas)
     logic             slverr; // error del slave (lo rellena el driver)
 
-    // pesos para el SIZE de CTRL, reparten entre 1, 2 y 4 bytes
-    // notar que solo valen combos validos: (4+offset)%size == 0
+    // pesos para el SIZE de CTRL, reparten entre 1, 2, 3 y 4 bytes
+    // los combos validos cumplen (4+offset)%size == 0
     //   size=1 -> sirve cualquier offset
     //   size=2 -> offset 0 o 2
+    //   size=3 -> solo offset 2 (porque (4+2)%3 == 0)
     //   size=4 -> offset 0
     int unsigned w_ctrl_size1 = 34;
     int unsigned w_ctrl_size2 = 33;
+    int unsigned w_ctrl_size3 = 0;
     int unsigned w_ctrl_size4 = 33;
+
+    // peso para generar a proposito un combo (size, offset) ilegal en CTRL
+    // el DUT rechaza esa escritura con PSLVERR, sirve para cubrir los bins
+    // de combinaciones ilegales en la cobertura del registro CTRL
+    int unsigned w_ctrl_illegal = 0;
+
+    // peso para escribir el bit CLR de CTRL (limpia el contador CNT_DROP)
+    int unsigned w_ctrl_clr = 0;
 
     // pesos para el OFFSET de CTRL (0 a 3)
     int unsigned w_ctrl_off0 = 25;
@@ -47,14 +57,27 @@ class apb_seq_item extends uvm_sequence_item;
     int unsigned w_ctrl_off2 = 25;
     int unsigned w_ctrl_off3 = 25;
 
-    rand logic [2:0] ctrl_size;   // tamano que se va a configurar en CTRL
-    rand logic [1:0] ctrl_offset; // offset que se va a configurar en CTRL
+    rand logic [2:0] ctrl_size;    // tamano que se va a configurar en CTRL
+    rand logic [1:0] ctrl_offset;  // offset que se va a configurar en CTRL
+    rand bit         ctrl_illegal; // 1 si esta escritura va con combo ilegal a proposito
+    rand bit         do_ctrl_clr;  // 1 si la escritura lleva el bit CLR prendido
 
-    // el SIZE solo puede ser 1, 2 o 4
+    // se decide por peso si la escritura de CTRL sera legal o ilegal
+    constraint c_ctrl_illegal_weight {
+        ctrl_illegal dist { 1'b0 := (100 - w_ctrl_illegal),
+                            1'b1 :=         w_ctrl_illegal  };
+    }
+
+    // si la escritura es legal el SIZE sale de los pesos (1, 2, 3 o 4)
+    // si es ilegal tambien puede salir size 0, que el DUT siempre rechaza
     constraint c_ctrl_size {
-        ctrl_size dist { 3'h1 := w_ctrl_size1,
-                         3'h2 := w_ctrl_size2,
-                         3'h4 := w_ctrl_size4 };
+        if (!ctrl_illegal)
+            ctrl_size dist { 3'h1 := w_ctrl_size1,
+                             3'h2 := w_ctrl_size2,
+                             3'h3 := w_ctrl_size3,
+                             3'h4 := w_ctrl_size4 };
+        else
+            ctrl_size inside {3'h0, 3'h2, 3'h3, 3'h4};
     }
 
     // el OFFSET se reparte segun sus pesos
@@ -65,9 +88,21 @@ class apb_seq_item extends uvm_sequence_item;
                            2'h3 := w_ctrl_off3 };
     }
 
-    // se garantiza que el par (size, offset) siempre sea valido para el DUT
+    // si la escritura es legal, el par (size, offset) cumple la formula del datasheet
+    // si es ilegal a proposito, se fuerza un par que NO la cumpla para que el DUT
+    // responda con PSLVERR; con size 0 cualquier offset es ilegal (se evita el
+    // modulo por cero del solver chequeando el size antes de aplicar la formula)
     constraint c_ctrl_valid_combo {
-        ((4 + ctrl_offset) % ctrl_size) == 0;
+        if (!ctrl_illegal)
+            ((4 + ctrl_offset) % ctrl_size) == 0;
+        else if (ctrl_size != 3'h0)
+            ((4 + ctrl_offset) % ctrl_size) != 0;
+    }
+
+    // se decide por peso si esta escritura de CTRL lleva el bit CLR
+    constraint c_ctrl_clr {
+        do_ctrl_clr dist { 1'b0 := (100 - w_ctrl_clr),
+                           1'b1 :=         w_ctrl_clr  };
     }
 
     // pesos para cada bit del IRQEN, cada uno se prende por separado
@@ -114,10 +149,12 @@ class apb_seq_item extends uvm_sequence_item;
         rdata       = '0;
         slverr      = 1'b0;
         op_type     = OP_CTRL_CFG;
-        ctrl_size   = 3'h1;
-        ctrl_offset = 2'h0;
-        irqen_bits  = 5'h0;
-        do_irq_clr  = 1'b0;
+        ctrl_size    = 3'h1;
+        ctrl_offset  = 2'h0;
+        ctrl_illegal = 1'b0;
+        do_ctrl_clr  = 1'b0;
+        irqen_bits   = 5'h0;
+        do_irq_clr   = 1'b0;
     endfunction
 
     // funcion para imprimir el item de forma legible en los logs

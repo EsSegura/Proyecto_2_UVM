@@ -15,8 +15,13 @@ class aligner_scoreboard extends uvm_scoreboard;
     // Handle para el modelo de registros
     aligner_apb_registerfile_model::aligner reg_model;
 
-    // cola de bytes RX pendientes de verificar en el TX
+    local logic [2:0] sb_ctrl_size   = 3'h1;
+    local logic [1:0] sb_ctrl_offset = 2'h0;
+
     local byte unsigned rx_byte_queue[$];
+
+    local bit sb_data_check_en = 1'b0; // habilitado en la 1a config valida
+    local bit sb_first_cfg     = 1'b1; // marca la configuracion inicial
 
     // contador de chequeos
     local int unsigned checks_passed;
@@ -66,24 +71,38 @@ class aligner_scoreboard extends uvm_scoreboard;
 
         aligned_addr = {trans.addr[15:2], 2'b00};
 
-        // Escritura a CTRL: actualizar el RAL con predict() para que
-        // SIZE.get() y OFFSET.get() reflejen lo que se escribió en el bus.
-        // La secuencia APB escribe directamente sin pasar por el RAL,
-        // así que el scoreboard es quien lo mantiene sincronizado.
+        // Escritura aceptada a CTRL: se actualiza la copia local con lo que
+        // realmente quedo configurado en el DUT
         if (trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
-           // void'(reg_model.CTRL.predict(trans.data));
+            sb_ctrl_size   = trans.data[2:0];
+            sb_ctrl_offset = trans.data[9:8];
+
+            rx_byte_queue.delete();
+
+            // El chequeo de datos solo se habilita en la PRIMERA config valida
+            sb_data_check_en = sb_first_cfg;
+            sb_first_cfg     = 1'b0;
+
             `uvm_info(get_type_name(),
-                $sformatf("SB predict CTRL: SIZE=%0d OFFSET=%0d (data=0x%0h)",
-                    reg_model.CTRL.SIZE.get(), reg_model.CTRL.OFFSET.get(), trans.data),
+                $sformatf("SB CTRL shadow: SIZE=%0d OFFSET=%0d (data=0x%0h) [data_check=%0b]",
+                    sb_ctrl_size, sb_ctrl_offset, trans.data, sb_data_check_en),
                 UVM_MEDIUM)
         end
 
-        // Verificar read-back de CTRL: lo leído debe coincidir con el RAL
+        // Escritura rechazada a CTRL, el PSLVERR debe corresponder a un combo
+        // realmente ilegal segun la formula del datasheet (o size 0)
+        if (trans.write && (aligned_addr == CTRL_ADDR) && trans.slverr) begin
+            do_check("PSLVERR en CTRL solo con combo ilegal",
+                (trans.data[2:0] == 0) ||
+                (((4 + trans.data[9:8]) % trans.data[2:0]) != 0));
+        end
+
+        // Verificar read-back de CTRL, lo leido debe coincidir con la copia local
         if (!trans.write && (aligned_addr == CTRL_ADDR) && !trans.slverr) begin
             read_size   = trans.rdata[2:0];
             read_offset = trans.rdata[9:8];
-            do_check("CTRL.SIZE read-back",   (read_size   == reg_model.CTRL.SIZE.get()));
-            do_check("CTRL.OFFSET read-back", (read_offset == reg_model.CTRL.OFFSET.get()));
+            do_check("CTRL.SIZE read-back",   (read_size   == sb_ctrl_size));
+            do_check("CTRL.OFFSET read-back", (read_offset == sb_ctrl_offset));
         end
 
         // Write a STATUS debe devolver PSLVERR
@@ -102,6 +121,7 @@ class aligner_scoreboard extends uvm_scoreboard;
     function void write_md_rx(md_seq_item trans);
         bit is_legal;
         int b;
+        int pos;
 
         // utilizando la ecuacion dada por el datasheet se usa ((ALGN_DATA_WIDTH/8) + offset) % size == 0
         // para DATA_WIDTH=32 daria ALGN_DATA_WIDTH/8 = 4
@@ -113,38 +133,56 @@ class aligner_scoreboard extends uvm_scoreboard;
         end else begin
             do_check("RX legal no debe tener rx_err",  (trans.rx_err === 1'b0));
 
-            // Encolar bytes validos para comparacion con TX
-            for (b = trans.rx_offset; b < int'(trans.rx_offset + trans.rx_size); b++)
-                rx_byte_queue.push_back(trans.rx_data[b*8 +: 8]);
-
-            `uvm_info(get_type_name(),
-                $sformatf("SB RX: %0d bytes encolados (total=%0d)", trans.rx_size, rx_byte_queue.size()),
-                UVM_MEDIUM)
+            // Encolar los 'size' bytes que el DUT extrae
+            if (sb_data_check_en) begin
+                for (b = 0; b < int'(trans.rx_size); b++) begin
+                    pos = int'(trans.rx_offset) + b;
+                    if (pos <= 3)
+                        rx_byte_queue.push_back(trans.rx_data[pos*8 +: 8]);
+                    else
+                        rx_byte_queue.push_back(8'h00);
+                end
+            end
         end
     endfunction
 
     // write_md_tx: recibe transferencias observadas en el canal TX
     function void write_md_tx(md_seq_item trans);
-        int b;
-        byte unsigned expected;
-        byte unsigned actual;
         logic [2:0] ctrl_size_val;
         logic [1:0] ctrl_offset_val;
+        int b;
+        int pos;
+        byte unsigned expected;
+        byte unsigned actual;
 
-        // Leer valores actuales desde el modelo de registros (mantenido
-        // sincronizado via predict() en write_apb cada vez que se escribe CTRL)
-        ctrl_size_val   = reg_model.CTRL.SIZE.get();
-        ctrl_offset_val = reg_model.CTRL.OFFSET.get();
+        //Leer la configuracion vigente desde la copia local del scoreboard
+        ctrl_size_val   = sb_ctrl_size;
+        ctrl_offset_val = sb_ctrl_offset;
 
-        do_check("TX offset == CTRL.OFFSET", (trans.tx_offset == ctrl_offset_val));
-        do_check("TX size == CTRL.SIZE",     (trans.tx_size   == ctrl_size_val));
+        //chequeo de paquetes legales
+        do_check("TX (size,offset) es un par legal",
+                 (trans.tx_size != 0) &&
+                 (((4 + trans.tx_offset) % trans.tx_size) == 0));
 
-        if (rx_byte_queue.size() >= ctrl_size_val) begin
-            for (b = 0; b < int'(ctrl_size_val); b++) begin
+        //chequeo del offset y size para comparar si saca bien la configuracion establecida
+        if (sb_data_check_en) begin
+            do_check("TX offset == CTRL.OFFSET", (trans.tx_offset == ctrl_offset_val));
+            do_check("TX size == CTRL.SIZE",     (trans.tx_size   == ctrl_size_val));
+        end
+
+
+        //Se consumen tx_size bytes del stream
+        //el byte b sale en la posicion (tx_offset + b) del bus. Las posiciones
+        //> 3 no son observables en 32 bits (3er byte de size3): se hace pop
+        //para no desfasar la cola
+        if (sb_data_check_en && (rx_byte_queue.size() >= int'(trans.tx_size))) begin
+            for (b = 0; b < int'(trans.tx_size); b++) begin
                 expected = rx_byte_queue.pop_front();
-                // El byte b del TX está en posición (ctrl_offset + b) del bus
-                actual   = trans.tx_data[(int'(ctrl_offset_val) + b)*8 +: 8];
-                do_check($sformatf("TX data byte[%0d] correcto", b), (actual == expected));
+                pos      = int'(trans.tx_offset) + b;
+                if (pos <= 3) begin
+                    actual = trans.tx_data[pos*8 +: 8];
+                    do_check($sformatf("TX data byte[%0d] correcto", b), (actual == expected));
+                end
             end
         end
     endfunction
@@ -161,3 +199,4 @@ class aligner_scoreboard extends uvm_scoreboard;
     endfunction
 
 endclass : aligner_scoreboard
+

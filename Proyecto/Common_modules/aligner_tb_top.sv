@@ -1,4 +1,5 @@
-`timescale 1ns/1ps
+// Code your testbench here
+// or browse Examples`timescale 1ns/1ps
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 
@@ -28,15 +29,18 @@ import aligner_apb_registerfile_model::*;
 `include "md_monitor.sv"
 `include "md_agent.sv"
 `include "md_rx_sequences.sv"
-`include "aligner_md_coverage.sv" //cobertura md
 
-//Scoreboard, env, test
+//Scoreboard, cobertura, env, test
 `include "aligner_scoreboard.sv"
+`include "aligner_md_coverage.sv" // collector de cobertura funcional del canal MD
 `include "aligner_env.sv"
 `include "aligner_test.sv"
 
+//Assertions (modulo SVA que se conecta directo a las senales del DUT)
+`include "aligner_assertions.sv"
+
 //DUT
-`include "design.sv"
+`include "design.v"
 
 module aligner_tb_top;
 
@@ -52,6 +56,8 @@ module aligner_tb_top;
 
     // reset bajo
     initial begin
+        $fsdbDumpfile("dump.fsdb");
+        $fsdbDumpvars(0, aligner_tb_top);// para ver formas de onda
         reset_n = 1'b0;
         repeat (5) @(posedge clk);
         @(negedge clk);
@@ -113,6 +119,38 @@ module aligner_tb_top;
         .irq        ()
     );
 
+    // modulo de assertions, pegado directo a las senales del DUT
+    aligner_assertions #(
+        .ADDR_WIDTH(16),
+        .DATA_WIDTH(ALGN_DATA_WIDTH)
+    ) assertions (
+        .clk         (clk),
+        .reset_n     (reset_n),
+
+        // APB
+        .psel        (apb_bus.PSEL),
+        .penable     (apb_bus.PENABLE),
+        .pwrite      (apb_bus.PWRITE),
+        .pready      (apb_bus.PREADY),
+        .pslverr     (apb_bus.PSLVERR),
+        .paddr       (apb_bus.PADDR),
+        .pwdata      (apb_bus.PWDATA),
+
+        // MD RX
+        .md_rx_valid (md_bus.md_rx_valid),
+        .md_rx_ready (md_bus.md_rx_ready),
+        .md_rx_err   (md_bus.md_rx_err),
+        .md_rx_size  (md_bus.md_rx_size),
+        .md_rx_offset(md_bus.md_rx_offset),
+
+        // MD TX
+        .md_tx_valid (md_bus.md_tx_valid),
+        .md_tx_ready (md_bus.md_tx_ready),
+        .md_tx_err   (md_bus.md_tx_err),
+        .md_tx_size  (md_bus.md_tx_size),
+        .md_tx_offset(md_bus.md_tx_offset)
+    );
+
 
     initial begin
         // APB
@@ -127,5 +165,6 @@ module aligner_tb_top;
         #1_000_000;
         `uvm_fatal("TB_TOP", "Timeout de simulación alcanzado")
     end
+   
 
-endmodule 
+endmodule
