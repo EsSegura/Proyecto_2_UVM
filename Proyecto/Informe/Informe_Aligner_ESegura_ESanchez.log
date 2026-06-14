@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.9.22)  6 JUN 2026 15:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.9.22)  14 JUN 2026 00:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -501,52 +501,60 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip59
 )
+(C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count318
+\float@exts=\toks29
+\float@box=\box60
+\@float@everytoks=\toks30
+\@floatcapt=\box61
+)
 (C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count318
-\l__pdf_internal_box=\box60
+\l__color_backend_stack_int=\count319
+\l__pdf_internal_box=\box62
 ) (Informe_Aligner_ESegura_ESanchez.aux
 LaTeX Info: Redefining \. on input line 14.
 LaTeX Info: Redefining \% on input line 14.
 )
 \openout1 = `Informe_Aligner_ESegura_ESanchez.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 72.
-LaTeX Font Info:    ... okay on input line 72.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 73.
+LaTeX Font Info:    ... okay on input line 73.
 
 -- Lines per column: 56 (exact).
 
 (C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count319
+\scratchcounter=\count320
 \scratchdimen=\dimen256
-\scratchbox=\box61
-\nofMPsegments=\count320
-\nofMParguments=\count321
-\everyMPshowfont=\toks29
-\MPscratchCnt=\count322
+\scratchbox=\box63
+\nofMPsegments=\count321
+\nofMParguments=\count322
+\everyMPshowfont=\toks31
+\MPscratchCnt=\count323
 \MPscratchDim=\dimen257
-\MPnumerator=\count323
-\makeMPintoPDFobject=\count324
-\everyMPtoPDFconversion=\toks30
+\MPnumerator=\count324
+\makeMPintoPDFobject=\count325
+\everyMPtoPDFconversion=\toks32
 )
 (C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
 ase.sty
@@ -558,10 +566,10 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 fg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-\c@lstlisting=\count325
-LaTeX Info: Redefining \. on input line 72.
-LaTeX Info: Redefining \% on input line 72.
-Package hyperref Info: Link coloring OFF on input line 72.
+\c@lstlisting=\count326
+LaTeX Info: Redefining \. on input line 73.
+LaTeX Info: Redefining \% on input line 73.
+Package hyperref Info: Link coloring OFF on input line 73.
  (Informe_Aligner_ESegura_ESanchez.out)
 (Informe_Aligner_ESegura_ESanchez.out)
 \@outlinefile=\write3
@@ -574,36 +582,30 @@ LaTeX Font Info:    Trying to load font information for T1+pcr on input line 84
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 149
+LaTeX Font Info:    Trying to load font information for U+msa on input line 140
 .
 (C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 149
+LaTeX Font Info:    Trying to load font information for U+msb on input line 140
 .
 
 (C:\Users\segur\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Underfull \hbox (badness 10000) in paragraph at lines 203--204
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
 []|\T1/pcr/m/n/8 SIZE[2:0]\T1/ptm/m/n/8 , \T1/pcr/m/n/8 OFFSET[9:8]\T1/ptm/m/n/
 8 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 204--205
+Underfull \hbox (badness 10000) in paragraph at lines 195--196
 []|\T1/pcr/m/n/8 CNT_DROP[7:0]\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 204--205
+Underfull \hbox (badness 10000) in paragraph at lines 195--196
 \T1/pcr/m/n/8 RX_LVL[11:9]\T1/ptm/m/n/8 ,
- []
-
-
-Underfull \hbox (badness 4353) in paragraph at lines 211--216
-\T1/pcr/m/n/10 TX_FIFO_EMPTY\T1/ptm/m/n/10 , \T1/pcr/m/n/10 TX_FIFO_FULL \T1/pt
-m/m/n/10 y \T1/pcr/m/n/10 MAX_DROP\T1/ptm/m/n/10 . El
  []
 
 
@@ -612,79 +614,103 @@ m/m/n/10 y \T1/pcr/m/n/10 MAX_DROP\T1/ptm/m/n/10 . El
 gur/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 224--232
+
+pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.201 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.201 
+      ]
+Underfull \hbox (badness 4353) in paragraph at lines 202--207
+\T1/pcr/m/n/10 TX_FIFO_EMPTY\T1/ptm/m/n/10 , \T1/pcr/m/n/10 TX_FIFO_FULL \T1/pt
+m/m/n/10 y \T1/pcr/m/n/10 MAX_DROP\T1/ptm/m/n/10 . El
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 215--223
 \T1/ptm/m/n/10 con $[] \OMS/cmsy/m/n/10 2 f\OT1/cmr/m/n/10 1\OML/cmm/m/it/10 ; 
 \OT1/cmr/m/n/10 2\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 4\OMS/cmsy/m/n/10 g$\T1/ptm
 /m/n/10 . Pa-ra un bus de 32 bits,
  []
 
 
-Underfull \hbox (badness 2126) in paragraph at lines 224--232
+Underfull \hbox (badness 2126) in paragraph at lines 215--223
 \T1/ptm/m/n/10 que el DUT mar-que error y des-car-te la trans-fe-ren-cia,
  []
 
-
-
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 252.
+nput line 243.
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <7> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 253.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 244.
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 269.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 260.
 
-Underfull \hbox (badness 10000) in paragraph at lines 269--279
+Underfull \hbox (badness 10000) in paragraph at lines 260--270
 \T1/pcr/m/n/10 OP_IRQEN_CFG\T1/ptm/m/n/10 , \T1/pcr/m/n/10 OP_STATUS_READ\T1/pt
 m/m/n/10 , \T1/pcr/m/n/10 OP_IRQ_READ\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 269--279
+Underfull \hbox (badness 10000) in paragraph at lines 260--270
 \T1/pcr/m/n/10 OP_IRQ_CLR\T1/ptm/m/n/10 , \T1/pcr/m/n/10 OP_CTRL_RECONFIG\T1/pt
 m/m/n/10 ). Con-tie-ne los
  []
 
 
-Underfull \hbox (badness 2181) in paragraph at lines 269--279
+Underfull \hbox (badness 2181) in paragraph at lines 260--270
 \T1/ptm/m/n/10 cam-pos de ba-jo ni-vel (\T1/pcr/m/n/10 addr\T1/ptm/m/n/10 , \T1
 /pcr/m/n/10 data\T1/ptm/m/n/10 , \T1/pcr/m/n/10 write\T1/ptm/m/n/10 , \T1/pcr/m
 /n/10 rdata\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 3884) in paragraph at lines 269--279
+Underfull \hbox (badness 3884) in paragraph at lines 260--270
 \T1/pcr/m/n/10 ctrl_offset\T1/ptm/m/n/10 , \T1/pcr/m/n/10 irqen_bits \T1/ptm/m/
 n/10 y \T1/pcr/m/n/10 do_irq_clr\T1/ptm/m/n/10 , to-dos
  []
 
 
-Underfull \hbox (badness 1571) in paragraph at lines 269--279
+Underfull \hbox (badness 1571) in paragraph at lines 260--270
 \T1/pcr/m/n/10 c_ctrl_valid_combo \T1/ptm/m/n/10 ga-ran-ti-za que so-lo se ge-n
 e-ren
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 281--287
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 272--278
  []\T1/ptm/m/it/10 2. \T1/pcr/m/sl/10 md_seq_item\T1/ptm/m/it/10 : [][][] \T1/p
 tm/m/n/10 Mo-de-la una trans-fe-ren-cia
  []
 
 
-Underfull \hbox (badness 5878) in paragraph at lines 281--287
+Underfull \hbox (badness 5878) in paragraph at lines 272--278
 \T1/ptm/m/n/10 del ca-nal MD. Los cam-pos \T1/pcr/m/n/10 rx_size\T1/ptm/m/n/10 
 , \T1/pcr/m/n/10 rx_offset
  []
 
 
-Underfull \hbox (badness 3118) in paragraph at lines 281--287
+Underfull \hbox (badness 3118) in paragraph at lines 272--278
 \T1/ptm/m/n/10 e \T1/pcr/m/n/10 is_illegal \T1/ptm/m/n/10 es-tán con-tro-la-dos
  por pe-sos; el da-to
  []
 
 
 
-[2]
-Underfull \hbox (badness 8000) in paragraph at lines 382--386
+[2
+pdfTeX warning (ext4): destination with the same identifier (name{table.3}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.326  
+            item.addr  = ADDR_CTRL;]
+Underfull \hbox (badness 8000) in paragraph at lines 373--377
 \T1/ptm/m/n/10 ca-nal TX. Man-tie-ne \T1/pcr/m/n/10 md_tx_ready \T1/ptm/m/n/10 
 se-gún un pe-so
  []
@@ -692,19 +718,19 @@ se-gún un pe-so
 
 
 
-Underfull \hbox (badness 1552) in paragraph at lines 428--432
+Underfull \hbox (badness 1552) in paragraph at lines 419--423
 []\T1/ptm/m/n/10 El \T1/pcr/m/n/10 apb_adapter \T1/ptm/m/n/10 (Lis-ta-do []7[])
  im-ple-men-ta \T1/pcr/m/n/10 reg2bus
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 428--432
+Underfull \hbox (badness 10000) in paragraph at lines 419--423
 \T1/ptm/m/n/10 y \T1/pcr/m/n/10 bus2reg\T1/ptm/m/n/10 , tra-du-cien-do en-tre l
 as ope-ra-cio-nes de
  []
 
 
-Underfull \hbox (badness 6173) in paragraph at lines 428--432
+Underfull \hbox (badness 6173) in paragraph at lines 419--423
 \T1/ptm/m/n/10 re-gis-tro de UVM y el \T1/pcr/m/n/10 apb_seq_item\T1/ptm/m/n/10
  . Jun-to con
  []
@@ -712,7 +738,7 @@ Underfull \hbox (badness 6173) in paragraph at lines 428--432
 
 
 [3]
-Underfull \hbox (badness 4454) in paragraph at lines 523--524
+Underfull \hbox (badness 4454) in paragraph at lines 514--515
 []|\T1/ptm/m/n/8 Pesos del OFF-SET con-fi-gu-ra-do en
  []
 
@@ -720,101 +746,187 @@ Underfull \hbox (badness 4454) in paragraph at lines 523--524
 
 
 
-[4]
-Underfull \hbox (badness 10000) in paragraph at lines 600--603
+[4
+pdfTeX warning (ext4): destination with the same identifier (name{table.4}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.590   \item L
+               impieza de interrupciÃ³n (W1C): con \texttt{+W\_IRQ\_CLR=100}]
+Underfull \hbox (badness 10000) in paragraph at lines 590--593
 []\T1/ptm/m/n/10 Limpieza de in-te-rrup-ción (W1C): con
  []
 
 
-Underfull \hbox (badness 3343) in paragraph at lines 600--603
+Underfull \hbox (badness 3343) in paragraph at lines 590--593
 \T1/pcr/m/n/10 +W_IRQ_CLR=100 \T1/ptm/m/n/10 jun-to a \T1/pcr/m/n/10 MAX_DROP\T
 1/ptm/m/n/10 , tras leer
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 603--606
+Underfull \hbox (badness 10000) in paragraph at lines 593--596
 []\T1/ptm/m/n/10 Tráfico to-tal-men-te le-gal o to-tal-men-te ile-gal:
  []
 
 
-Underfull \hbox (badness 1466) in paragraph at lines 603--606
+Underfull \hbox (badness 1466) in paragraph at lines 593--596
 \T1/ptm/m/n/10 (nin-gu-na TX pro-du-ci-da) son los dos ex-tre-mos del
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 624--627
+[]\T1/ptm/m/n/10 La se-lec-ción del es-ce-na-rio se rea-li-za edi-tan-do
+ []
 
-<diagrama_ambiente.pdf, id=347, 552.82132pt x 451.0993pt>
+
+Underfull \hbox (badness 1584) in paragraph at lines 624--627
+\T1/pcr/m/n/10 plusargs.txt \T1/ptm/m/n/10 an-tes de in-vo-car \T1/pcr/m/n/10 m
+ake run \T1/ptm/m/n/10 o \T1/pcr/m/n/10 make
+ []
+
+
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 678--688
+ []\T1/ptm/m/it/10 1. Co-ber-tu-ra del re-gis-tro \T1/pcr/m/sl/10 CTRL\T1/ptm/m
+/it/10 : [][][] \T1/ptm/m/n/10 La cla-se
+ []
+
+
+Underfull \hbox (badness 3746) in paragraph at lines 678--688
+\T1/ptm/m/n/10 y mues-trea ex-clu-si-va-men-te en es-cri-tu-ras, que son las
+ []
+
+
+Underfull \hbox (badness 4467) in paragraph at lines 678--688
+\T1/ptm/m/n/10 una vez (\T1/pcr/m/n/10 cp_clr\T1/ptm/m/n/10 ); y cer-ti-fi-car 
+me-dian-te dos cru-ces
+ []
+
+
+
+[5
+pdfTeX warning (ext4): destination with the same identifier (name{table.5}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.707 \subsubsection
+                    {Cobertura de los canales MD}]
+<cov_estructural.png, id=383, 400.49625pt x 143.53625pt>
+File: cov_estructural.png Graphic file (type png)
+<use cov_estructural.png>
+Package pdftex.def Info: cov_estructural.png  used on input line 731.
+(pdftex.def)             Requested size: 252.0pt x 90.3166pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 736--748
+\T1/ptm/m/n/10 (100$ $%), \T1/pcr/m/n/10 cfs_synch_fifo \T1/ptm/m/n/10 (99.86$ 
+$%) y
+ []
+
+
+Underfull \hbox (badness 3460) in paragraph at lines 736--748
+\T1/pcr/m/n/10 cfs_edge_detect \T1/ptm/m/n/10 (96.67$ $%), lo que in-di-ca que 
+el
+ []
+
+
+Underfull \hbox (badness 2865) in paragraph at lines 736--748
+\T1/ptm/m/it/10 cloc-king blocks \T1/ptm/m/n/10 sin ló-gi-ca com-bi-na-cio-nal 
+ni se-cuen-cial
+ []
+
+
+
+
+
+[6
+pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.822 
+      
+pdfTeX warning (ext4): destination with the same identifier (name{table.6}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.822 
+       <./cov_estructural.png>]
+
+pdfTeX warning: pdflatex (file ./diagrama_ambiente.pdf): PDF inclusion: found P
+DF version <1.7>, but at most version <1.5> allowed
+<diagrama_ambiente.pdf, id=396, 1195.01572pt x 845.04686pt>
 File: diagrama_ambiente.pdf Graphic file (type pdf)
 <use diagrama_ambiente.pdf>
-Package pdftex.def Info: diagrama_ambiente.pdf  used on input line 687.
-(pdftex.def)             Requested size: 423.12378pt x 345.2688pt.
+Package pdftex.def Info: diagrama_ambiente.pdf  used on input line 856.
+(pdftex.def)             Requested size: 423.12378pt x 299.20073pt.
 
-Underfull \hbox (badness 1371) in paragraph at lines 706--707
+Underfull \hbox (badness 1371) in paragraph at lines 875--876
 []|\T1/ptm/m/n/8 TX con si-ze=4, off-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 707--707
+Underfull \hbox (badness 10000) in paragraph at lines 876--876
 []|\T1/pcr/m/n/8 +W_CTRL_OFF0=100 +W_CTRL_OFF1=0 +W_CTRL_OFF2=0
  []
 
 
-Underfull \hbox (badness 2012) in paragraph at lines 707--708
+Underfull \hbox (badness 2012) in paragraph at lines 876--877
 []|\T1/ptm/m/n/8 OFFSET=0 en to-das
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 708--709
+Underfull \hbox (badness 10000) in paragraph at lines 877--878
 []|\T1/pcr/m/n/8 CNT_DROP=0\T1/ptm/m/n/8 , sin
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 709--710
+Underfull \hbox (badness 10000) in paragraph at lines 878--879
 []|\T1/ptm/m/n/8 RX ile-ga-les con
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 712--712
+Underfull \hbox (badness 10000) in paragraph at lines 881--881
 []|\T1/pcr/m/n/8 +W_IRQEN_MAX_DROP=100 +W_ILLEGAL=100
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 712--713
+Underfull \hbox (badness 10000) in paragraph at lines 881--882
 []|\T1/pcr/m/n/8 IRQ[4]=1\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 713--713
+Underfull \hbox (badness 10000) in paragraph at lines 882--882
 []|\T1/pcr/m/n/8 +W_IRQEN_MAX_DROP=100 +W_ILLEGAL=100
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 714--714
+Underfull \hbox (badness 10000) in paragraph at lines 883--883
 []|\T1/pcr/m/n/8 +W_IRQEN_MAX_DROP=100 +W_IRQ_CLR=100
  []
 
 
-Underfull \hbox (badness 5908) in paragraph at lines 715--716
+Underfull \hbox (badness 5908) in paragraph at lines 884--885
 []|\T1/ptm/m/n/8 4 blo-ques RX con
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 716--716
+Underfull \hbox (badness 10000) in paragraph at lines 885--885
 []|\T1/pcr/m/n/8 +NUM_TRANSFERS=500 +W_ILLEGAL=30
  []
 
 
-Underfull \hbox (badness 6188) in paragraph at lines 734--734
+Underfull \hbox (badness 6188) in paragraph at lines 903--903
 []|\T1/ptm/m/n/8 Tamaño no po-ten-cia de 2
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 739--739
+Underfull \hbox (badness 10000) in paragraph at lines 908--908
 []|\T1/pcr/m/n/8 +TX_READY_WEIGHT=0
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 743--743
+Underfull \hbox (badness 10000) in paragraph at lines 912--912
 []|\T1/ptm/m/n/8 Limpieza de in-te-rrup-ción
  []
 
@@ -831,7 +943,29 @@ Before submitting the final camera ready copy, remember to:
 
 
 
-[5] [6 <./diagrama_ambiente.pdf>] [7] (Informe_Aligner_ESegura_ESanchez.aux
+
+
+[7
+
+] [8
+pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) ha
+s been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.930 \end{document}
+                    
+pdfTeX warning (ext4): destination with the same identifier (name{table.7}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.930 \end{document}
+                     <./diagrama_ambiente.pdf>] [9
+pdfTeX warning (ext4): destination with the same identifier (name{table.8}) has
+ been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.930 \end{document}
+                    ] (Informe_Aligner_ESegura_ESanchez.aux
 LaTeX Info: Redefining \. on input line 14.
 LaTeX Info: Redefining \% on input line 14.
 )
@@ -843,36 +977,21 @@ L3 programming layer <2024-07-20>
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-
-Package rerunfilecheck Warning: File `Informe_Aligner_ESegura_ESanchez.out' has
- changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `Informe_Aligner_ESegura_ESanchez.ou
-t':
-(rerunfilecheck)             Before: 011BAD735D341EFC50B05D60D9E08477;6543
-(rerunfilecheck)             After:  E8DA04CFB00BBB8DC6BA2E66958907EB;6174.
+Package rerunfilecheck Info: File `Informe_Aligner_ESegura_ESanchez.out' has no
+t changed.
+(rerunfilecheck)             Checksum: B689599947846F61B42B0D77B4C51962;8107.
  ) 
 Here is how much of TeX's memory you used:
- 15237 strings out of 473899
- 235932 string characters out of 5726500
- 2390960 words of memory out of 5000000
- 37726 multiletter control sequences out of 15000+600000
+ 15336 strings out of 473899
+ 237390 string characters out of 5726500
+ 2362960 words of memory out of 5000000
+ 37809 multiletter control sequences out of 15000+600000
  676708 words of font info for 165 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,11n,79p,565b,2010s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-pdfTeX warning (dest): name{table.7} has been referenced but does not exist, re
-placed by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.6.2} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.6.1} has been referenced but does not ex
-ist, replaced by a fixed one
+pdfTeX warning (dest): name{equation.1} has been referenced but does not exist,
+ replaced by a fixed one
 
 <C:/Users/segur/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
 ex10.pfb><C:/Users/segur/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
@@ -889,10 +1008,10 @@ r/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/segu
 r/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/seg
 ur/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/seg
 ur/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Informe_Aligner_ESegura_ESanchez.pdf (7 pages, 288942 bytes).
+Output written on Informe_Aligner_ESegura_ESanchez.pdf (9 pages, 396146 bytes).
 
 PDF statistics:
- 580 PDF objects out of 1000 (max. 8388607)
- 178 named destinations out of 1000 (max. 500000)
- 334 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 523 PDF objects out of 1000 (max. 8388607)
+ 190 named destinations out of 1000 (max. 500000)
+ 395 words of extra memory for PDF output out of 10000 (max. 10000000)
 

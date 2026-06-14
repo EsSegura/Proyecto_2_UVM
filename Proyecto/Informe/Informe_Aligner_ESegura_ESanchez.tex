@@ -15,6 +15,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
+\usepackage{float}
 
 % ---------- Estilo de listings para SystemVerilog ----------
 \definecolor{svgreen}{rgb}{0,0.5,0}
@@ -77,18 +78,16 @@ essegura@estudiantec.cr}
 Este trabajo presenta el ambiente de verificación funcional de un módulo
 alineador de datos (\textit{aligner}) descrito en SystemVerilog y verificado
 con la metodología universal de verificación (UVM). El objetivo central del
-diseño del \textit{testbench} fue evitar pruebas codificadas de forma rígida
-(\textit{hardcoded}): en su lugar se implementó una \emph{única prueba general}
+diseño del \textit{testbench} fue implementar una \emph{única prueba general}
 cuyo comportamiento se controla por completo mediante argumentos de línea de
-comando (\textit{plusargs}). Estos argumentos no fijan valores de estímulo, sino
+comando (\textit{plusargs}) para verificar casos esquinas que fueron considerados. Estos argumentos no fijan valores de estímulo, sino
 que ajustan los pesos de restricciones \texttt{dist} ubicadas en los
 \textit{sequence items}, de modo que el solucionador de restricciones genera
 aleatoriamente los casos requeridos. Se describen la arquitectura del ambiente,
 los agentes APB y MD, el \textit{scoreboard} con modelo de registros (RAL)
 sincronizado por adaptador y por predicción explícita, la metodología de pesos y
 el plan de pruebas completo con su mapeo a plusargs. Los resultados muestran que
-la totalidad de los escenarios del plan de pruebas se alcanzan sin modificar el
-código fuente, únicamente variando los plusargs.
+la gran totalidad de los escenarios del plan de pruebas fueron alcanzados.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -112,14 +111,6 @@ escrita por un bus APB. El módulo además contabiliza las transferencias
 descartadas y genera interrupciones mediante un conjunto de registros de control
 y estado.
 
-Un requisito explícito del curso es que \emph{ninguna prueba esté codificada de
-forma rígida}: no deben existir múltiples clases de prueba con valores fijos para
-cada caso, sino una sola prueba general cuyos distintos escenarios se obtengan
-activando restricciones o variando valores mediante plusargs. La
-Sección~\ref{sec:metodologia} detalla cómo se cumple este requisito y la
-Sección~\ref{sec:testplan} mapea cada objetivo de verificación a su combinación
-de plusargs.
-
 % =====================================================================
 \section{Dispositivo Bajo Prueba}
 
@@ -141,7 +132,7 @@ Tablas~\ref{tab:apb} y~\ref{tab:md} describen sus señales. Ambas interfaces
 definen \textit{clocking blocks} separados para el \textit{driver} (vista activa)
 y el \textit{monitor} (vista pasiva), garantizando muestreo sincrónico.
 
-\begin{table}[t]
+\begin{table}[H]
 \caption{Señales de la interfaz APB (\texttt{apb\_if})}
 \label{tab:apb}
 \centering
@@ -162,7 +153,7 @@ y el \textit{monitor} (vista pasiva), garantizando muestreo sincrónico.
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
 \caption{Señales de la interfaz MD (\texttt{md\_if})}
 \label{tab:md}
 \centering
@@ -191,7 +182,7 @@ y el \textit{monitor} (vista pasiva), garantizando muestreo sincrónico.
 La Tabla~\ref{tab:registros} resume el mapa de registros, obtenido del modelo RAL
 autogenerado con PeakRDL.
 
-\begin{table}[t]
+\begin{table}[H]
 \caption{Mapa de registros del DUT}
 \label{tab:registros}
 \centering
@@ -467,7 +458,7 @@ El \texttt{aligner\_env} crea y conecta todos los componentes
 \texttt{run\_phase}, fija valores por defecto razonables y ejecuta siempre el
 mismo esqueleto. El \texttt{aligner\_tb\_top} genera el reloj y el \textit{reset},
 instancia el DUT y las interfaces, las publica por \texttt{uvm\_config\_db} y
-lanza la prueba con \texttt{run\_test("aligner\_test")}.
+lanza la prueba con \texttt{run\_test(aligner\_test)}.
 
 % =====================================================================
 \section{Metodología: Restricciones Ponderadas y Plusargs}
@@ -505,7 +496,7 @@ Tabla~\ref{tab:testplan}, incluida en el Apéndice~\ref{app:complementos}, mapea
 cada objetivo de verificación a la combinación de plusargs que lo alcanza, todos
 ejecutados sobre la misma prueba \texttt{aligner\_test}.
 
-\begin{table}[t]
+\begin{table}[H]
 \caption{Argumentos de línea de comando (plusargs)}
 \label{tab:plusargs}
 \centering
@@ -532,8 +523,7 @@ ejecutados sobre la misma prueba \texttt{aligner\_test}.
 \section{Casos de Esquina}
 \label{sec:esquina}
 
-Los casos de esquina (\textit{corner cases}) no constituyen pruebas separadas:
-son condiciones límite que la prueba general \texttt{aligner\_test} puede alcanzar
+Los casos de esquina son condiciones límite que la prueba general puede alcanzar
 configurando los pesos adecuados. Esta sección describe los casos considerados,
 agrupados según el mecanismo del DUT que estresan, y la Tabla~\ref{tab:esquina},
 incluida en el Apéndice~\ref{app:complementos}, los resume junto con la
@@ -607,6 +597,34 @@ relevantes:
 
 % =====================================================================
 \section{Flujo de Ejecución}
+La interacción con el ambiente se realiza mediante un \texttt{Makefile} que
+encapsula los pasos de compilación, simulación y otras funcionalidades con el objetivo de no tener que modificar un script de bash cada vez que se quiera ejecutar algo diferente, o de tener que escribir manualmente los comandos en la consola. Los \textit{targets}
+disponibles se resumen en la Tabla~\ref{tab:makefile}.
+
+\begin{table}[H]
+\caption{Targets del \texttt{Makefile} del ambiente de verificación}
+\label{tab:makefile}
+\centering
+\footnotesize
+\begin{tabular}{@{}lp{5.2cm}@{}}
+\toprule
+\textbf{Target} & \textbf{Descripción} \\
+\midrule
+\texttt{make all}     & Compila el ambiente y ejecuta la simulación (comportamiento por defecto). \\
+\texttt{make compile} & Compila el ambiente con VCS, habilitando cobertura de línea, condición, FSM, toggle y rama. \\
+\texttt{make run}     & Ejecuta la simulación con los plusargs definidos en \texttt{plusargs.txt}; requiere compilación previa. \\
+\texttt{make waves}   & Ejecuta la simulación generando formas de onda en formato FSDB y abre Verdi automáticamente; requiere compilación previa. \\
+\texttt{make cov}     & Abre la base de datos de cobertura en Verdi; requiere compilación y simulación previas. \\
+\texttt{make clean}   & Elimina todos los archivos generados, preservando los fuentes \texttt{.sv}, \texttt{.sh}, el \texttt{Makefile} y el \texttt{plusargs.txt}. \\
+\texttt{make help}    & Muestra un resumen de los targets disponibles. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La selección del escenario se realiza editando \texttt{plusargs.txt}
+antes de invocar \texttt{make run} o \texttt{make waves}; el ambiente
+no requiere recompilación a menos que se modifique el código fuente.
+
 El procesamiento de una corrida sigue la siguiente secuencia:
 \begin{enumerate}
   \item El \texttt{tb\_top} genera reloj y \textit{reset}, publica las
@@ -625,8 +643,7 @@ El procesamiento de una corrida sigue la siguiente secuencia:
 % =====================================================================
 \section{Resultados}
 
-Todos los escenarios de la Tabla~\ref{tab:testplan} se ejecutaron sin modificar
-el código fuente. A modo de ejemplo, el escenario~4
+Todos los escenarios de la Tabla~\ref{tab:testplan}. A modo de ejemplo, el escenario~4
 (\texttt{+W\_ILLEGAL=0 +NUM\_TRANSFERS=100}) con una configuración aleatoria
 \texttt{SIZE=2, OFFSET=2} produjo el resumen:
 \begin{center}
@@ -644,20 +661,172 @@ Para el escenario~8 se verificó que con 300 transferencias ilegales el contador
 (escenario~9) la interrupción permanece inactiva, consistente con la
 especificación del registro \texttt{IRQ}.
 
+
 % =====================================================================
 \section{Cobertura}
 \label{sec:cobertura}
-% TODO (compañero): describir los covergroups, coverpoints y cross-coverage
-% implementados, así como los porcentajes alcanzados por escenario.
-%
-% Sugerencia de subsecciones:
-%   \subsection{Cobertura de código}
-%   \subsection{Cobertura funcional (covergroups)}
-%   \subsection{Cross-coverage SIZE x OFFSET}
-%   \subsection{Análisis de huecos de cobertura}
-%
-% Insertar tabla de resultados de cobertura y figuras del visor.
-\textit{[Sección en desarrollo por el integrante a cargo de cobertura.]}
+
+Para medir la exhaustividad del ambiente se utilizaron dos grupos de
+métricas complementarias: cobertura estructural (línea, \textit{toggle},
+condición y rama) reportada directamente por VCS sobre los módulos del DUT,
+y cobertura funcional sobre los registros del modelo RAL y el tráfico de los
+canales MD.
+
+\subsection{Plan de Cobertura Funcional}
+\label{sec:cov_plan}
+\subsubsection{Cobertura del registro \texttt{CTRL}}
+La clase \texttt{aligner\_\_CTRL\_cov} hereda el modelo RAL de \texttt{CTRL}
+y muestrea exclusivamente en escrituras, que son las operaciones que modifican
+la configuración del alineador. Sus objetivos son: verificar que se escribieron
+los cuatro tamaños válidos y los inválidos (\texttt{cp\_size}); confirmar que
+los cuatro offsets posibles fueron ejercitados (\texttt{cp\_offset}); comprobar
+que el bit \texttt{CLR[16]} fue activado al menos una vez (\texttt{cp\_clr});
+y certificar mediante dos cruces (\texttt{cx\_legales} y \texttt{cx\_ilegales})
+que se probaron tanto los ocho pares \texttt{(size, offset)} que satisfacen
+la regla $(4+\text{offset})\bmod\text{size}=0$ como los que deben provocar
+\texttt{PSLVERR} según la lógica de \texttt{cfs\_regs}.
+
+\subsubsection{Cobertura del registro \texttt{STATUS}}
+El \textit{covergroup} \texttt{status\_cg} muestrea solo en lecturas.
+Distingue tres estados para \texttt{CNT\_DROP}: cero \textit{drops}, valores
+intermedios (1--254) y saturación exacta (255, que activa \texttt{MAX\_DROP});
+y tres niveles para cada FIFO (vacía, parcial y llena), con el objetivo de
+confirmar que el estímulo forzó la FIFO de recepción y de transmisión a sus
+límites.
+
+\subsubsection{Cobertura de \texttt{IRQEN} e \texttt{IRQ}}
+\texttt{irqen\_cg} muestrea en escrituras y define un \textit{coverpoint}
+independiente por cada uno de los cinco bits de habilitación
+(\texttt{RX\_FIFO\_EMPTY}, \texttt{RX\_FIFO\_FULL}, \texttt{TX\_FIFO\_EMPTY},
+\texttt{TX\_FIFO\_FULL} y \texttt{MAX\_DROP}), verificando que cada fuente fue
+habilitada y deshabilitada de forma individual. \texttt{irq\_cg} muestrea en
+ambas direcciones: en lectura captura las interrupciones activas y en escritura
+los bits que el software limpia mediante el mecanismo W1C, confirmando que cada
+interrupción fue observada tanto activa como inactiva.
+
+\subsubsection{Cobertura de los canales MD}
+El componente \texttt{aligner\_md\_coverage} recibe dos flujos de análisis
+independientes. El \textit{covergroup} de recepción \texttt{rx\_cg} verifica
+los cinco valores posibles de \texttt{size} (incluidos los siempre ilegales
+0 y 3), los cuatro offsets, el indicador \texttt{rx\_err}, y tres cruces que
+confirman tanto los pares legales como los ilegales según la
+Ecuación~\eqref{eq:legal}, comprobando además que la señal de error del DUT
+coincide con la predicción para cada tamaño (\texttt{cx\_err\_vs\_size}). El
+\textit{covergroup} de transmisión \texttt{tx\_cg} verifica los ocho pares
+\texttt{(size, offset)} que \texttt{CTRL} puede configurar legalmente,
+asegurando que el alineador emitió datos con todas las combinaciones de salida
+posibles; \texttt{tx\_err=1} se declara \texttt{ignore\_bins} porque por diseño
+el DUT nunca lo aserta en TX.
+
+\subsection{Cobertura Estructural}
+\label{sec:cov_estructural}
+
+La Figura~\ref{fig:cov_estructural} muestra los resultados de cobertura
+estructural obtenidos de VCS. El puntaje global del ambiente
+(\texttt{aligner\_tb\_top}) es de 61.90\,\%, valor que refleja la agregación
+ponderada de todas las métricas sobre los módulos instanciados.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{cov_estructural.png}
+  \caption{Reporte de cobertura estructural por módulo generado por VCS/Verdi.}
+  \label{fig:cov_estructural}
+\end{figure}
+
+Los módulos de mayor cobertura son \texttt{cfs\_tx\_ctrl} (100\,\%),
+\texttt{cfs\_synch\_fifo} (99.86\,\%) y \texttt{cfs\_edge\_detect} (96.67\,\%),
+lo que indica que el estímulo ejercitó de forma exhaustiva la lógica de
+transmisión, la FIFO interna y la detección de flancos de las señales de estado.
+En el extremo opuesto, \texttt{apb\_if} presenta el valor más bajo (37.36\,\%
+únicamente en \textit{toggle}), lo cual es esperado: la interfaz es un archivo
+de declaraciones de señales y \textit{clocking blocks} sin lógica combinacional
+ni secuencial propia; la herramienta solo puede medir el \textit{toggle} de sus
+puertos, y aquellas líneas del bus APB de 32 bits que no cambiaron durante la
+simulación (bits de \texttt{PWDATA} y \texttt{PRDATA} que quedaron fijos en
+cero en la mayoría de accesos de configuración) reducen el porcentaje
+naturalmente.
+
+El banco de registros \texttt{cfs\_regs} obtiene 68.55\,\% de \textit{score}
+con apenas 38.75\,\% en \textit{toggle}. Esto se explica por su estructura
+interna: contiene diez registros de un bit para \texttt{IRQEN} e \texttt{IRQ},
+y para que el \textit{toggle} de uno de esos flip-flops se marque como cubierto
+debe observarse tanto el valor 0 como el 1 durante la simulación. Los bits de
+\texttt{IRQ} asociados a las FIFOs (\texttt{RX\_FIFO\_FULL},
+\texttt{TX\_FIFO\_FULL}) solo se activan si las FIFOs saturan \emph{y} la
+interrupción está habilitada simultáneamente, condición que no se alcanza en
+todos los escenarios de la corrida por defecto. La baja cobertura de condición
+de \texttt{cfs\_ctrl} (33.33\,\%) refleja la complejidad de su lógica de
+reensamblado: el módulo contiene múltiples ramas anidadas que comparan
+\texttt{unaligned\_bytes\_processed}, \texttt{unaligned\_size} y
+\texttt{ctrl\_size} simultáneamente, y algunas combinaciones de esas
+comparaciones solo ocurren cuando un paquete RX de tamaño grande se reacomoda
+en múltiples paquetes TX pequeños bajo contrapresión sostenida, escenario que
+requiere una corrida dirigida específica.
+
+\subsection{Cobertura Funcional de Registros y Canales MD}
+\label{sec:cov_funcional}
+
+La Tabla~\ref{tab:cobertura} resume los porcentajes de cobertura funcional
+alcanzados en la corrida por defecto.
+
+\begin{table}[H]
+\caption{Cobertura funcional alcanzada (corrida por defecto)}
+\label{tab:cobertura}
+\centering
+\footnotesize
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Grupo de cobertura} & \textbf{Alcanzado} \\
+\midrule
+CTRL                         & 94.0\,\%  \\
+STATUS                       & 77.8\,\%  \\
+IRQEN                        & 100.0\,\% \\
+IRQ                          & 80.0\,\%  \\
+\midrule
+MD RX (size / offset / err / cruces) & 96.7\,\%  \\
+MD TX (size / offset / cx\_size\_offset) & 87.5\,\%  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\texttt{IRQEN} alcanza el 100\,\% porque los pesos \texttt{W\_IRQEN\_*}
+permitieron habilitar y deshabilitar cada bit de forma independiente.
+\texttt{MD RX} llega al 96.7\,\% dado que la mayoría de los pares de
+\texttt{cx\_err\_vs\_size} fueron observados. \texttt{MD TX} se queda en
+87.5\,\% porque el par \texttt{(size=3, offset=2)} en el canal de salida
+exige que \texttt{CTRL} se configure con ese valor exacto durante suficientes
+ciclos como para producir al menos una transferencia TX completa.
+
+\subsection{Lectura de los Porcentajes Faltantes}
+
+Los porcentajes que no llegan al 100\,\% no responden a errores del ambiente
+sino a la naturaleza de cada métrica. En \texttt{STATUS} e \texttt{IRQ} los
+\textit{bins} restantes exigen estados que solo aparecen al estresar mecanismos
+muy concretos: la saturación simultánea de las FIFOs con interrupciones
+habilitadas, o la limpieza de bits específicos que no se activan con estímulo
+aleatorio sin dirección. Ninguno de estos casos es inalcanzable; simplemente
+requiere una corrida dirigida a esa condición. La estrategia para cerrar los
+huecos es ejecutar varios escenarios del plan de pruebas y combinar sus bases de
+datos de cobertura mediante \textit{coverage merging}, en lugar de buscar un
+único conjunto de plusargs que lo logre todo a la vez.
+
+\subsection{Aserciones (SVA)}
+
+De forma paralela al \textit{scoreboard}, un bloque de aserciones observa
+directamente las señales del DUT y comprueba propiedades temporales que serían
+difíciles de expresar en el modelo de referencia. Las más relevantes verifican
+que toda transferencia RX ilegal se traduzca en \texttt{rx\_err}, que las TX
+respeten la regla de alineamiento, que el alineador nunca emita una salida con
+error y que un acceso APB inválido devuelva \texttt{PSLVERR}. Estas aserciones
+se mantuvieron activas durante toda la simulación y ninguna falló.
+
+Junto a las propiedades de comprobación se incluyeron algunas \texttt{cover
+property} para confirmar que las situaciones de interés realmente ocurrieron
+durante la corrida. El reporte de VCS registró 31~ocurrencias de transferencias
+\texttt{size=3} legales, 35~de \texttt{size=3} ilegales y 14~accesos APB con
+\texttt{PSLVERR}, todas sobre un total de 2546~intentos evaluados. La presencia
+de estos eventos da confianza en que la cobertura reportada proviene de tráfico
+real y no de \textit{bins} muestreados por casualidad.
 
 % =====================================================================
 \section{Conclusiones}
