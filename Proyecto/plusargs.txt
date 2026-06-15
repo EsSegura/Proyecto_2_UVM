@@ -1,170 +1,93 @@
-// ============================================================================
-//  plusargs.txt  -  Configuracion de la prueba general aligner_test
-// ----------------------------------------------------------------------------
-//  Uso:   ./simv -f plusargs.txt        (o el ejecutable que genere su flujo)
-//
-//  Reglas:
-//    - Cada plusarg va con el signo '+' adelante, ejemplo: +W_ILLEGAL=100
-//    - Las lineas que empiezan con // son comentarios y se ignoran.
-//    - Si un plusarg NO se especifica, el test usa su valor por defecto.
-//    - Para activar un escenario, se descomenta su bloque y se comentan los
-//      demas (no mezclar dos bloques, porque los pesos se contradicen).
-//    - Los pesos van de 0 a 100. Peso 0 = desactiva ese valor; peso 100 = lo
-//      fuerza; valores intermedios reparten la probabilidad.
-// ============================================================================
+// plusargs.txt  para proyecto2 veri
 
+// ESCENARIOS DEL PLAN DE PRUEBAS
 
-// ----------------------------------------------------------------------------
-//  REFERENCIA DE PLUSARGS (no descomentar esta lista, es solo documentacion)
-// ----------------------------------------------------------------------------
-//  NOTA: el test base SIN plusargs ya corre el escenario mas general posible
-//  (reconfigs, ilegales, size 3, CLR, IRQEN variado y back-pressure activados
-//  por defecto) para maximizar la cobertura en una sola corrida. Los plusargs
-//  sirven para estrechar a un escenario puntual del plan de pruebas.
-//
-//  Cantidad de estimulo
-//    +NUM_TRANSFERS=N        cantidad de transferencias RX        (default 300)
-//
-//  Distribucion del estimulo RX (canal de datos)
-//    +W_SIZE1=N +W_SIZE2=N +W_SIZE3=N +W_SIZE4=N  pesos del tamano (1,2,3,4 bytes)
-//                            (size 3 solo es legal con offset 2)
-//    +W_OFF0=N   +W_OFF1=N   +W_OFF2=N  +W_OFF3=N   pesos del offset (0..3)
-//    +W_ILLEGAL=N            peso de transferencias ilegales (0..100)
-//
-//  Consumidor TX
-//    +TX_READY_WEIGHT=N      disponibilidad del consumidor (0=siempre ocupado,
-//                            100=siempre listo). Sirve para back-pressure.
-//
-//  Configuracion del registro CTRL (como se configura el alineador)
-//    +W_CTRL_SIZE1=N +W_CTRL_SIZE2=N +W_CTRL_SIZE3=N +W_CTRL_SIZE4=N  pesos SIZE
-//    +W_CTRL_OFF0=N   +W_CTRL_OFF1=N   +W_CTRL_OFF2=N  +W_CTRL_OFF3=N  OFFSET
-//    +W_CTRL_ILLEGAL=N      peso de escrituras CTRL con combos ilegales
-//                           (el DUT responde PSLVERR y no cambia la config)
-//    +W_CTRL_CLR=N          peso de mandar el bit CLR (limpia CNT_DROP)
-//    +N_RECONFIG=N          reconfiguraciones de CTRL en medio del test
-//
-//  Interrupciones (registro IRQEN). Bit a bit, 0=apagado, 100=encendido
-//    +W_IRQEN_RX_EMPTY=N    bit 0  RX_FIFO_EMPTY
-//    +W_IRQEN_RX_FULL=N     bit 1  RX_FIFO_FULL
-//    +W_IRQEN_TX_EMPTY=N    bit 2  TX_FIFO_EMPTY
-//    +W_IRQEN_TX_FULL=N     bit 3  TX_FIFO_FULL
-//    +W_IRQEN_MAX_DROP=N    bit 4  MAX_DROP (dispara al saturar CNT_DROP=255)
-//    +W_IRQ_CLR=N           peso de limpieza W1C tras leer IRQ
-// ============================================================================
-
-
-
-// ============================================================================
-//  ESCENARIO ACTIVO
-//  Para la corrida de COBERTURA MAXIMA no se necesita ningun plusarg: basta
-//  correr el test sin -f (los defaults del test ya activan todo). Este bloque
-//  queda comentado a proposito; descomentarlo solo para forzar el trafico
-//  uniforme y legal clasico.
-// ============================================================================
-//+NUM_TRANSFERS=100
-//+W_SIZE1=34  +W_SIZE2=33  +W_SIZE3=0  +W_SIZE4=33
-//+W_OFF0=25   +W_OFF1=25   +W_OFF2=25  +W_OFF3=25
-//+W_ILLEGAL=0
-//+TX_READY_WEIGHT=100
-//+W_CTRL_SIZE1=34  +W_CTRL_SIZE2=33  +W_CTRL_SIZE3=0  +W_CTRL_SIZE4=33
-//+W_CTRL_OFF0=25   +W_CTRL_OFF1=25   +W_CTRL_OFF2=25  +W_CTRL_OFF3=25
-//+W_CTRL_ILLEGAL=0 
-//+W_CTRL_CLR=0
- 
-// ============================================================================
-//  ESCENARIOS DEL PLAN DE PRUEBAS
-//  (descomentar uno y comentar el bloque "ESCENARIO ACTIVO" de arriba)
-// ============================================================================
-
-// --- T1: Configurar CTRL solo en bytes (size=1) -----------------------------
+// T1: Solo bytes (size=1)
 //+NUM_TRANSFERS=100
 //+W_CTRL_SIZE1=100 +W_CTRL_SIZE2=0 +W_CTRL_SIZE4=0
 
-// --- T2: Configurar CTRL solo en words (size=4, offset 0) -------------------
+// T2: Solo words (size=4, offset=0)
 //+NUM_TRANSFERS=100
 //+W_CTRL_SIZE4=100 +W_CTRL_SIZE1=0 +W_CTRL_SIZE2=0
 //+W_CTRL_OFF0=100  +W_CTRL_OFF1=0  +W_CTRL_OFF2=0 +W_CTRL_OFF3=0
 
-// --- T3: Solo offset base (0) ----------------------------------------------
+// T3: Solo offset base (0)
 //+NUM_TRANSFERS=100
 //+W_CTRL_OFF0=100 +W_CTRL_OFF1=0 +W_CTRL_OFF2=0 +W_CTRL_OFF3=0
 
-// --- T4: Trafico RX solo legal ---------------------------------------------
+// T4: Trafico RX 100% legal
 //+NUM_TRANSFERS=100
 //+W_ILLEGAL=0
 
-// --- T5: Mezcla legal/ilegal (30% ilegales) --------------------------------
+// T5: Mezcla legal/ilegal (30% ilegales)
 //+NUM_TRANSFERS=100
 //+W_ILLEGAL=30
 
-// --- T6: Trafico totalmente ilegal -----------------------------------------
+// T6: Trafico 100% ilegal
 //+NUM_TRANSFERS=100
 //+W_ILLEGAL=100
 
-// --- T7: Contrapresion del consumidor TX -----------------------------------
+// T7: Back-pressure del consumidor TX
 //+NUM_TRANSFERS=100
 //+TX_READY_WEIGHT=20
 
-// --- T8: Interrupcion MAX_DROP al saturar (CNT_DROP=255) --------------------
+// T8: MAX_DROP dispara al saturar CNT_DROP=255
 //+NUM_TRANSFERS=300
 //+W_ILLEGAL=100
 //+W_IRQEN_MAX_DROP=100
 
-// --- T9: MAX_DROP NO dispara con menos de 255 drops -------------------------
+// T9: MAX_DROP NO dispara con menos de 255 drops
 //+NUM_TRANSFERS=50
 //+W_ILLEGAL=100
 //+W_IRQEN_MAX_DROP=100
 
-// --- T10: Limpieza de interrupcion (W1C) -----------------------------------
+// T10: Limpieza de interrupcion W1C
 //+NUM_TRANSFERS=300
 //+W_ILLEGAL=100
 //+W_IRQEN_MAX_DROP=100
 //+W_IRQ_CLR=100
 
-// --- T11: Reconfiguracion dinamica de CTRL ---------------------------------
+// T11: Reconfiguracion dinamica de CTRL
 //+NUM_TRANSFERS=200
 //+N_RECONFIG=3
 
-// --- T12: Estres combinado -------------------------------------------------
+// T12: Estres combinado
 //+NUM_TRANSFERS=500
 //+W_ILLEGAL=30
 //+TX_READY_WEIGHT=50
 //+N_RECONFIG=3
 
 
+// CASOS DE ESQUINA
 
-// ============================================================================
-//  CASOS DE ESQUINA
-// ============================================================================
-
-// --- C1: Palabra completa (size=4, offset=0) -------------------------------
+// C1: Palabra completa (size=4, offset=0)
 //+NUM_TRANSFERS=100 +W_CTRL_SIZE4=100 +W_CTRL_SIZE1=0 +W_CTRL_SIZE2=0 +W_CTRL_OFF0=100  +W_CTRL_OFF1=0  +W_CTRL_OFF2=0 +W_CTRL_OFF3=0 +W_SIZE4=100 +W_SIZE3=0 +W_SIZE1=0 +W_SIZE2=0 +W_OFF0=100  +W_OFF1=0  +W_OFF2=0 +W_OFF3=0
 
-// --- C2: Offset maximo legal (size=1, offset=3) ----------------------------
+// C2: Offset maximo legal (size=1, offset=3)
 //+NUM_TRANSFERS=100
 //+W_SIZE1=100 +W_SIZE2=0 +W_SIZE4=0
 //+W_OFF3=100  +W_OFF0=0  +W_OFF1=0 +W_OFF2=0
 
-// --- C3: Halfword en offset par alto (size=2, offset=2) ---------------------
+// C3: Halfword en offset par alto (size=2, offset=2)
 //+NUM_TRANSFERS=100
 //+W_SIZE2=100 +W_SIZE1=0 +W_SIZE4=0
 //+W_OFF2=100  +W_OFF0=0  +W_OFF1=0 +W_OFF3=0
 
-// --- C7: CNT_DROP justo por debajo del umbral (254) ------------------------
+// C7: CNT_DROP justo antes del umbral (254)
 //+NUM_TRANSFERS=254
 //+W_ILLEGAL=100
 //+W_IRQEN_MAX_DROP=100
 
-// --- C8: CNT_DROP en el umbral exacto (255) --------------------------------
+// C8: CNT_DROP exactamente en el umbral (255)
 //+NUM_TRANSFERS=255
 //+W_ILLEGAL=100
 //+W_IRQEN_MAX_DROP=100
 
-// --- C10: FIFO TX llena (back-pressure total) ------------------------------
+// C10: Back-pressure total en TX
 //+NUM_TRANSFERS=100
 //+TX_READY_WEIGHT=0
 
-// --- C14: Limpieza de interrupcion (W1C) -----------------------------------
+// C14: Limpieza W1C tras saturacion
 //+W_IRQEN_MAX_DROP=100
 //+W_IRQ_CLR=100
 //+W_ILLEGAL=100
